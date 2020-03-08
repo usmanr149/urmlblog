@@ -18,7 +18,7 @@ YOLO mark is GUI for drawing bounding boxes of objects in images for YOLO v3 and
 
 For example I can use Yolo mark to draw bounding box around planes in this pictures.
 
-![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/airplane_bbox_original.png)
+![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/airplane_bbox_original.jpg)
 *Airplanes*
 
 Now I would like to rotate the image and the bounding boxes I generated using the 
