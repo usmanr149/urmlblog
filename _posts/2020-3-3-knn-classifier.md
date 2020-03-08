@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Implement and Apply a k-Nearest Neighbor (kNN) Classifier -- Exercise
+categories: [Machine Learning, NumPy]
+tags: [kNN, CS231n, cifar-10]
 ---
 
 I am currently listening to the lectures for 
