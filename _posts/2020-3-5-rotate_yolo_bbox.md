@@ -14,9 +14,8 @@ the augmented images.
 Recently while working on an image detection problem I wrote some code to rotate
 YOLO mark labels to create new images.
 
-YOLO mark is GUI for drawing bounding boxes of objects in images for YOLO v3 and v2 training.
-
-For example I can use Yolo mark to draw bounding box around planes in this pictures.
+YOLO mark is GUI for drawing bounding boxes of objects in images for YOLO v3 and v2 
+training. I can use Yolo mark to draw bounding box around planes in this pictures.
 
 ![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/airplane_bbox_original.jpg)
 *Airplanes*
@@ -197,6 +196,10 @@ Rotating the image easy using cv2.
         rotated_mat = cv2.warpAffine(self.image, rotation_mat, (bound_w, bound_h))
         return rotated_mat
 ```
+
+We can use this code to greatly increase the number of images we pass to train our
+computer vision model. In addition, you can also add random noise to images to and
+then rotate them, you can go crazy.
 
 See the full code [here](https://github.com/usmanr149/Yolo_bbox_manipulation).
 
