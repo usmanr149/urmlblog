@@ -58,13 +58,13 @@ The point $$(x,y)$$ will be rotated counterclockwise by angle $$\theta$$.
 
 ![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/pointRotation.jpg)
 
-To obtain 
+To obtain the position of the new point, we do a simple matrix multiplication.
 
 $$
 \begin{align}
 \begin{pmatrix}
 \text{cos } \theta & -\text{sin } \theta \\
-\text{sin } \theta & -\text{cos } \theta
+\text{sin } \theta & \text{cos } \theta
 \end{pmatrix}*
 \begin{pmatrix}
 x \\
@@ -78,11 +78,16 @@ y'
 $$
 
 Once we have rotated all four corners of the bounding box, we need to find the 2 
-farthest rotated points in the x-axis, this will correspond to the new width of 
-the new bounding box, and the y-axis, this will correspond to the new height of 
+farthest rotated points in the *x*-axis, this will correspond to the new width of 
+the new bounding box, and the *y*-axis, this will correspond to the new height of 
 the bounding box.
 
 ![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/bbox_rotation.jpg)
+*The old bounding box is in blue, the new rotated bounding box is in red. The new
+bounding box whose dimensions we need for YOLO is shown in black.*
+
+The reason we need the new height and width is because YOLO only takes in bounding 
+boxes parallel to the x-y axis.
 
 ### Python Implementation
 
