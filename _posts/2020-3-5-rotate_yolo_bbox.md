@@ -1,6 +1,6 @@
 ---
 layout: post
-title: How to Rotate YOLO Bounding Boxes
+title: How to Rotate YOLO Bounding Boxes?
 ---
 
 ![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/rotated_bbox.jpg)
@@ -34,7 +34,7 @@ then a '.txt' file will automatically be created with the following line:
 
 $$
 \begin{align}
-image label, center\_x/W, center\_y/H, bbox\_width/W, bbox\_height/H
+\text{image label}, \text{center_x}/W, \text{center_y}/H, \text{bbox_width}/W, \text{bbox\_height}/H
 \end{align}
 $$
 
