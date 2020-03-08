@@ -3,7 +3,7 @@ layout: post
 title: How to Rotate YOLO Bounding Boxes
 ---
 
-![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/airplane_bbox_original.png)
+![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/rotated_bbox.jpg)
 *Rotate the image along with the bounding boxes.*
 
 Image augmentation is a common technique in computer vision to increase the 
@@ -34,7 +34,7 @@ then a '.txt' file will automatically be created with the following line:
 
 $$
 \begin{align}
-image label, center_x/W, center_y/H, bbox_width/W, bbox_height/H
+image label, center\_x/W, center\_y/H, bbox\_width/W, bbox\_height/H
 \end{align}
 $$
 
