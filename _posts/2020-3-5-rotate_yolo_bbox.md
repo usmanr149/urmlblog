@@ -198,8 +198,8 @@ Rotating the image easy using cv2.
 ```
 
 We can use this code to greatly increase the number of images we pass to train our
-computer vision model. In addition, you can also add random noise to images to and
-then rotate them, you can go crazy.
+computer vision model. In addition, you can also add random noise to images before 
+rotating, you can go crazy.
 
 See the full code [here](https://github.com/usmanr149/Yolo_bbox_manipulation).
 
