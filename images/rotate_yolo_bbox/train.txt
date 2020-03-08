@@ -1,1 +1,3 @@
 ./group-airplanes.jpg
+./rotated.jpg
+./rotated_group-airplanes_25.jpg
