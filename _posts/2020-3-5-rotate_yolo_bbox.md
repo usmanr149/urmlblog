@@ -197,9 +197,9 @@ Rotating the image easy using cv2.
         return rotated_mat
 ```
 
-We can use this code to greatly increase the number of images we pass to train our
-computer vision model. In addition, you can also add random noise to images before 
-rotating, you can go crazy.
+You can use this code to greatly increase the number of different images you pass to 
+train your computer vision model. In addition, you can also add random noise to 
+images before rotating, you can go crazy.
 
 See the full code [here](https://github.com/usmanr149/Yolo_bbox_manipulation).
 
