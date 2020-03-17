@@ -1,13 +1,15 @@
 ---
 layout: post
 title: Implement and Apply a k-Nearest Neighbor (kNN) Classifier -- Exercise
-categories: [Machine Learning, NumPy]
+categories: [CS231n assignments]
 tags: [kNN, CS231n, cifar-10]
 ---
 
+<p class="message">
 I am currently listening to the lectures for 
-[CS231n: Convolutional Neural Networks for Visual Recognition](https://www.youtube.com/watch?v=vT1JzLTH4G4&list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&index=1)
-I will post my solutions to the [programming exercises](http://cs231n.github.io/) attached with this course here.
+<a href="https://www.youtube.com/watch?v=vT1JzLTH4G4&list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&index=1">CS231n: Convolutional Neural Networks for Visual Recognition</a>
+I will post my solutions to the <a href="">http://cs231n.github.io/</a>
+</p>
 
 In this exercise we are asked to train a k-NN classifier on the CIFAR-10 dataset. 
 The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, 
