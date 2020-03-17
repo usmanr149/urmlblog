@@ -89,8 +89,8 @@ If $$k \neq y_i$$ then
 $$
 \begin{align}
 \frac{\partial L}{\partial score_{i,k}}  &= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial score_{i,k}} \\
-&= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial \sum_j e^{score_{i,j}}} \frac{\partial \sum_j e^{score_{i,j}}}{\partial score_{i,k}} \\
-&= \frac{1}{\sum_j e^{score_{i,j}}}score_{i,k}
+&= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial \sum_j e^{score_{i,j}}} \frac{\partial \sum_j e^{score_{i,j}}}{\partial e^{score_{i,k}} } \\
+&= \frac{1}{\sum_j e^{score_{i,j}}} e^{score_{i,k}}
 \end{align}
 $$
 
@@ -98,7 +98,7 @@ We can similarly show that if $$k = y_i$$ then
 
 $$
 \begin{align}
-\frac{\partial L}{\partial score_{i,y_i}}  = -1 + \frac{1}{\sum_j e^{score_{i,j}}}score_{i,y_i}
+\frac{\partial L}{\partial score_{i,y_i}}  = -1 + \frac{1}{\sum_j e^{score_{i,j}}} e^{score_{i,y_i}}
 \end{align}
 $$
 
