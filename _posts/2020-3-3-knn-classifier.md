@@ -24,17 +24,17 @@ our testing and training dataset. We have already reshaped the CIFAR-10 data int
 rows. So the distance between test data *i* and train data *j* is given as
 
 $$
-\begin{align*}
+\begin{align}
   dist[i,j] = \sqrt{(\sum_{dim=1}^{dim=3072} (X\_train[j][dim] - X\_ test[i][dim])^2}
-\end{align*}
+\end{align}
 $$
 
 Another way to write this as a dot product:
 
 $$
-\begin{align*}
+\begin{align}
   dist[i,j] = \sqrt{(X\_ train[j] - X\_test[i]) \cdot (X\_ train[j] - X\_test[i])}
-\end{align*}
+\end{align}
 $$
 
 Here is the code implemented in python:

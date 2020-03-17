@@ -55,8 +55,8 @@ score matrix is given by
 
 $$
 \begin{align}
-L &= \frac{1}{N} \sum_i L_i + \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \\
-&= \frac{1}{N} \sum_i -\text{log}\frac{e^{score_{i,y_i}}}{\sum_j e^{score_{i,j}}} + \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \\
+L &= \frac{1}{N} \sum_i L_i + \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \nonumber \\
+&= \frac{1}{N} \sum_i -\text{log}\frac{e^{score_{i,y_i}}}{\sum_j e^{score_{i,j}}} + \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \nonumber \\
 & = -score_{i,y_i} + \text{log}\sum_j e^{score_{i,j}} + \lambda(||W^{(1)}||^2 + W^{(2)}||^2)
 \end{align}
 $$
@@ -66,7 +66,7 @@ The derivative $$\frac{\partial L}{\partial scores}$$ is equivalent to
 $$
 \begin{align}
 \frac{\partial L}{\partial scores} = \begin{pmatrix}
-\frac{\partial L}{\partial score_{0,0}} & \frac{\partial L}{\partial score_{0,1}} & \dots \\
+\frac{\partial L}{\partial score_{0,0}} & \frac{\partial L}{\partial score_{0,1}} & \dots  \\
 \frac{\partial L}{\partial score_{1,0}} & \frac{\partial L}{\partial score_{1,1}} & \dots \\
 \vdots & \vdots & \ddots
 \end{pmatrix}
@@ -88,8 +88,8 @@ If $$k \neq y_i$$ then
 
 $$
 \begin{align}
-\frac{\partial L}{\partial score_{i,k}}  &= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial score_{i,k}} \\
-&= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial \sum_j e^{score_{i,j}}} \frac{\partial \sum_j e^{score_{i,j}}}{\partial e^{score_{i,k}} } \\
+\frac{\partial L}{\partial score_{i,k}}  &= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial score_{i,k}} \nonumber \\
+&= \frac{\partial (\text{log}\sum_j e^{score_{i,j}})}{\partial \sum_j e^{score_{i,j}}} \frac{\partial \sum_j e^{score_{i,j}}}{\partial e^{score_{i,k}} } \nonumber \\
 &= \frac{1}{\sum_j e^{score_{i,j}}} e^{score_{i,k}}
 \end{align}
 $$
