@@ -115,9 +115,6 @@ class yoloRotatebbox:
             [[np.cos(rotation_angle), -np.sin(rotation_angle)], [np.sin(rotation_angle), np.cos(rotation_angle)]])
 ```
 
-Once we have the image name, we can also read in the .txt file that has the 
-bounding box information from Yolo_mark and  
-
 Rotating the image easy using cv2.
 
 ```python
@@ -148,6 +145,9 @@ Rotating the image easy using cv2.
         return rotated_mat
 ```
 
+Once we have the image name and the rotated image dimension, we can read in the .txt file that has the 
+bounding box information from Yolo_mark and rotate the bounding the box.
+
 ```python
     def rotateYolobbox(self):
 
@@ -166,7 +166,8 @@ Rotating the image easy using cv2.
             if len(bbox) > 1:
                 (center_x, center_y, bbox_width, bbox_height) = yoloFormattocv(float(bbox[1]), float(bbox[2]),
                                                                                float(bbox[3]), float(bbox[4]), H, W)
-
+                
+                # shift the origin to the center of the image.
                 upper_left_corner_shift = (center_x - W / 2, -H / 2 + center_y)
                 upper_right_corner_shift = (bbox_width - W / 2, -H / 2 + center_y)
                 lower_left_corner_shift = (center_x - W / 2, -H / 2 + bbox_height)
@@ -200,7 +201,7 @@ Rotating the image easy using cv2.
         return new_bbox
 ```
 
-We can use this code to greatly increase the number of images we pass to train our
+We can use this code to greatly increase the number and diversity of images to train our
 computer vision model. In addition, you can also add random noise to images before 
 rotating, you can go crazy.
 
