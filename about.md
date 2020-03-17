@@ -1,12 +1,14 @@
 ---
 layout: page
 title: About
-permalink: /about/
+sidebar_link: true
 ---
 
-Hello all, my name is Usman. I am a data scientist at the City of Edmonton.
+<p class="message">
+  Hello all, my name is Usman. I am a data scientist at the City of Edmonton.
 
 I started this blog to share my work on Machine Learning.
+</p>
 
 ### Contact me
 Usman Rizwan

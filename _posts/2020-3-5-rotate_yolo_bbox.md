@@ -1,6 +1,7 @@
 ---
 layout: post
 title: How to Rotate YOLO Bounding Boxes?
+categories: [YOLO]
 ---
 
 ![_config.yml]({{ site.baseurl }}/images/rotate_yolo_bbox/rotated_bbox.jpg)
