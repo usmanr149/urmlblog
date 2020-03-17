@@ -8,7 +8,7 @@ tags: [kNN, CS231n, cifar-10]
 <p class="message">
 I am currently working my way through the lectures for 
 <a href="https://www.youtube.com/watch?v=vT1JzLTH4G4&list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&index=1">CS231n: Convolutional Neural Networks for Visual Recognition</a>.
-I will post my solutions to the <a href="">https://usmanr149.github.io/urmlblog//</a>
+I will post my solutions to the <a href="https://usmanr149.github.io/urmlblog/">here</a>.
 </p>
 
 In this exercise we are asked to train a k-NN classifier on the CIFAR-10 dataset. 

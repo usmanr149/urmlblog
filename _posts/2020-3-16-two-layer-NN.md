@@ -7,7 +7,7 @@ categories: [CS231n assignments]
 <p class="message">
 I am currently working my way through the lectures for 
 <a href="https://www.youtube.com/watch?v=vT1JzLTH4G4&list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&index=1">CS231n: Convolutional Neural Networks for Visual Recognition</a>.
-I will post my solutions to the <a href="">https://usmanr149.github.io/urmlblog//</a>
+I will post my solutions to the <a href="https://usmanr149.github.io/urmlblog/">here</a>.
 </p>
 
 
