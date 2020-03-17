@@ -49,7 +49,7 @@ $$
 \begin{align}
 \begin{pmatrix}
 \text{cos } \theta & -\text{sin } \theta \\
-\text{sin } \theta & -\text{cos } \theta
+\text{sin } \theta & \text{cos } \theta
 \end{pmatrix}
 \end{align}
 $$
