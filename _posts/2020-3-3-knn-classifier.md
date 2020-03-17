@@ -20,7 +20,7 @@ with 6000 images per class. There are 50000 training images and 10000 test image
 ### Using Two Loops to Calculate Distances
 
 This is rather simple, we need to calculate the Euclidean distance between each point in 
-out testing and training dataset. We have already reshaped the CIFAR-10 data into single 
+our testing and training dataset. We have already reshaped the CIFAR-10 data into single 
 rows. So the distance between test data *i* and train data *j* is given as
 
 $$
@@ -55,14 +55,15 @@ looks like.
 ![_config.yml]({{ site.baseurl }}/images/knn.png)
 
 The bright in the image above indicate test images that are very similar to a variety 
-of training images based on a simple Euclidean distance. This would also imply that the image classification for the images with bright rows will not be very reliable.
+of training images based on a simple Euclidean distance. This would also imply that the image classification for 
+the images with bright rows will not be very reliable.
 
 Similarly for bright columns, the training images would be very similar 
 to all images in the test set based on simple Euclidean distance.
 
 ### Using One Loop to Calculate Distances
 
-We can use some numpy magic to reduce to calculate the distance matrix with just one loop
+We can use some numpy magic to calculate the distance matrix with just one loop
 
 ```python
 num_test = X.shape[0]
@@ -92,7 +93,7 @@ $$
 \end{align*}
 $$
 
-We can simplify the matrices above as follows
+Rewrite the matrix multiplication above as follows
 
 $$
 \begin{align*}
