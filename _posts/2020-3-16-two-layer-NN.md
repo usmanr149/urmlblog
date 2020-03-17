@@ -53,15 +53,15 @@ For the backward we first need to calculate the derivative of the loss $$L$$
 with respect to all elements of the score matrix. The softmax loss of the 
 score matrix is given by
 
-```
+
 $$
 \begin{align}
 L &= \frac{1}{N} \sum_i L_i + \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \nonumber \\
-&= \frac{1}{N} \sum_i -\text{log}\frac{e^{score_{i,y_i}}}{\sum_j e^{score_{i,j}}} + \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \nonumber \\
+&= \frac{1}{N} \sum_i -\text{log}\frac{e^{score_{i,y_i}}}{\sum_j e^{score_{i,j}}} \nonumber \\ 
+&+ \lambda(||W^{(1)}||^2 + W^{(2)}||^2) \nonumber \\
 & = -score_{i,y_i} + \text{log}\sum_j e^{score_{i,j}} + \lambda(||W^{(1)}||^2 + W^{(2)}||^2)
 \end{align}
 $$
-```
 
 The derivative $$\frac{\partial L}{\partial scores}$$ is equivalent to
 
@@ -79,7 +79,7 @@ Lets calculate
 
 $$
 \begin{align}
-\frac{\partial L}{\partial score_{i,k}}  = \frac{\partial (-score_{i,y_i} + \text{log}\sum_j e^{score_{i,j}})}{\partial score_{i,k}}
+\frac{\partial L}{\partial score_{i,k}}  = \frac{\partial (-score_{i,y_i}  + \text{log}\sum_j e^{score_{i,j}})}{\partial score_{i,k}}
 \end{align}
 $$
 
