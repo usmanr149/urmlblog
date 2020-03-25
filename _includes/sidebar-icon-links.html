@@ -1,10 +1,10 @@
 <nav id="sidebar-icon-links">
   {% if site.hydeout.repo %}
-    <a id="github-link"
-       class="icon" title="Github Project" aria-label="Github Project"
-       href="{{ site.hydeout.repo }}">
-      {% include svg/github.svg %}
-    </a>
+<!--    <a id="github-link"-->
+<!--       class="icon" title="Github Project" aria-label="Github Project"-->
+<!--       href="{{ site.hydeout.repo }}">-->
+<!--      {% include svg/github.svg %}-->
+<!--    </a>-->
     <a id="github-download-link"
        class="icon" title="Download" aria-label="Download"
        href="{{ site.hydeout.repo }}/archive/v{{ site.hydeout.version }}.zip">
@@ -30,6 +30,18 @@
       {% assign search_page = node %}
     {% endif %}
   {% endfor %}
+
+  <a id="linkedin-link"
+       title="Linkedin" aria-label="linkedin" class="icon" target="_blank"
+       href="{{ site.linkedin.url }}">
+      {% include svg/Linkedin.svg %}
+    </a>
+
+    <a id="github-link"
+       title="Github" aria-label="github" class="icon" target="_blank"
+       href="{{ site.github.url }}">
+      {% include svg/github.svg %}
+    </a>
 
   {% if tags_page %}
     <a id="tags-link"
