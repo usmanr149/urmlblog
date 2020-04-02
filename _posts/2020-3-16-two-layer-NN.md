@@ -7,12 +7,12 @@ categories: [CS231n assignments]
 <p class="message">
 I am currently working my way through the lectures for 
 <a href="https://www.youtube.com/watch?v=vT1JzLTH4G4&list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&index=1">CS231n: Convolutional Neural Networks for Visual Recognition</a>.
-I will post my solutions to the <a href="https://usmanr149.github.io/urmlblog/">here</a>.
+I will post my solutions <a href="https://usmanr149.github.io/urmlblog/">here</a>.
 </p>
 
 
 ![_config.yml]({{ site.baseurl }}/images/assignment1/2-layer-NN.png)
-*A fully-connected 2 layer neural network. Made using [NN-SVG](http://alexlenail.me/NN-SVG/index.html)*
+*A fully-connected 2 layer neural network. Made using [NN-SVG](http://alexlenail.me/NN-SVG/index.html).*
 
 In this assignment we are asked to implement a 2 layer network. To start off
 lets first draw the 2 layer neural network as a computational graph.

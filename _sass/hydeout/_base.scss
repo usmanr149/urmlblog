@@ -6,6 +6,13 @@
   box-sizing: border-box;
 }
 
+.MathJax_Display {
+  scrollbar-width: inherit;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+
 html,
 body {
   margin: 0;

@@ -15,12 +15,13 @@ MathJax.Hub.Config({
   MathJax.Hub.Config({
     TeX: { equationNumbers: { autoNumber: "all" } }
   });
-  MathJax.Hub.Config({
-    jax: ["input/TeX","output/HTML-CSS"],
-    displayAlign: "left"
-  });
+<!--  MathJax.Hub.Config({-->
+<!--    jax: ["input/TeX","output/HTML-CSS"],-->
+<!--    displayAlign: "left"-->
+<!--  });-->
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
   {% include favicons.html %}
 
   <body class="{{ page.layout }}{% if page.url == '/' %} home{% endif %}">

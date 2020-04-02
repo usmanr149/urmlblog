@@ -24,8 +24,10 @@
 
 body {
   background-attachment: fixed;
-  background-color: $sidebar-bg-color;
-  background-image: linear-gradient(to bottom, lighten($sidebar-bg-color, 7%), darken($sidebar-bg-color, 7%));
+//   background-color: $sidebar-bg-color;
+  background-color: $body-bg;
+  background-image: linear-gradient(to bottom, lighten($sidebar-bg-color, 1%), darken($sidebar-bg-color, 30%));
+//   background-image: linear-gradient(to bottom, lighten($body-bg, 7%), darken($body-bg, 7%));
   color: $sidebar-text-color;
   display: flex;
   flex-direction: column;
@@ -230,7 +232,7 @@ body {
     }
 
     > * {
-      max-width: 38rem;
+      max-width: 50rem;
       padding: 0;
     }
   }
