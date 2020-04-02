@@ -42,5 +42,4 @@ sidebar_home_link:  true
 disqus:
   shortname: https-usmanr149-github-io-urmlblog
 
-site:
-  google_analytics: UA-162541860-1
+google_analytics: UA-162541860-1
