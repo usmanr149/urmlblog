@@ -32,8 +32,8 @@ $$
 and the result will be a <i>N</i> dimensional vector.
 </p>
 
-Batch normalization is applied across feature axis. For e.g. if their a batch of three samples and 
-each sample has five dimensions:
+Batch normalization is applied across feature axis. For e.g. if we have a batch of three samples and 
+each sample has five dimensions as follows
 
 ![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_along_feature_axis.png)
 *In batch normalization, the normalization is done across feature axis.*
@@ -52,7 +52,7 @@ $$
 \end{align}
 $$
 
-and batch normalization will be as follows
+and the batch normalized matrix will look as follows
 
 $$
 \begin{align} \label{eqn:xhat}
@@ -143,26 +143,24 @@ def batchnorm_forward(x, gamma, beta, bn_param):
 
 ## Batch Normalization -- backward
 
-Calculating batch normalization via the circuit diagram is quite tedious. Review the details of 
+Calculating batch normalization via the computation graph is quite tedious. Review the details of 
 matrix multiplication bacward propogation in the <a href="http://cs231n.stanford.edu/handouts/linear-backprop.pdf" target="_blank">lecture 4 handouts</a>
 to better understand the derivation given below.
 
 
 
-Lets start with the circuit diagram of the forward pass first and then go through the backward pass.
+Lets start with the computation graph of the forward pass first and then go through the backward pass.
 
 ![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_Backward.png)
 *Forward pass of the batch normalization.*
 
-Now lets start the backward propogation. We recieved a $$N\times D$$ matrix 
+Now lets start the backward propogation. We assume that we have recieved a $$N\times D$$ matrix 
 $$\frac{\partial L}{\partial y}$$ from upstream. So lets calculate
 
 $$
 \frac{\partial L}{\partial \beta}, \text{This will be a } D \text{ dimensional vector.} \nonumber\\
 \frac{\partial L}{\partial g}, \text{This will be a } N \times D \text{ matrix.} \nonumber
 $$
-
-as shown in red box in the image below.
 
 ![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_Backward_1.png)
 
@@ -191,7 +189,7 @@ $$
 \begin{align}\label{eqn:dgamma}
 \frac{\partial L}{\partial \gamma} &= \frac{\partial L}{\partial g}\frac{\partial g}{\partial \gamma} \nonumber \\
 &= \frac{\partial L}{\partial g}\frac{\partial (\gamma f)}{\partial \gamma} \nonumber \\
-&= \frac{\partial L}{\partial g}f \\
+&= \frac{\partial L}{\partial g}f \nonumber \\
 &= \sum^{axis=0}\left(\frac{\partial L}{\partial y}f\right), \text{This will be a } D \text{ dimensional vector.}
 \end{align}
 $$
@@ -269,8 +267,8 @@ $$
 \frac{\partial \sigma^2}{\partial x_{0,0}} = 
 \begin{pmatrix}
 \frac{\partial \sigma_0^2}{\partial x_{0,0}} & \frac{\partial \sigma_1^2}{\partial x_{0,0}} & 
-\frac{\partial \sigma_2^2}{\partial x_{0,0}}  & \frac{\partial \sigma_3^2}{\partial x_{0,0}} & 
-\frac{\partial \sigma_4^2}{\partial x_{0,0}} & \dots
+\dots  & \frac{\partial \sigma_{D-2}^2}{\partial x_{0,0}} & 
+\frac{\partial \sigma_{D-1}^2}{\partial x_{0,0}}
 \end{pmatrix}
 \end{align}
 $$
@@ -289,7 +287,7 @@ $$
 \begin{align}
 \frac{\partial \sigma^2}{\partial x_{0,0}} = 
 \begin{pmatrix}
-\frac{2}{N} (x_{0,0} - \frac{1}{m}\sum_{i=0}^{N-1} x_{i,0}) & 0 & 0 & 0 & 0 & \dots
+\frac{2}{N} (x_{0,0} - \mu_0) & 0 & \dots & 0 & 0
 \end{pmatrix}
 \end{align}
 $$
@@ -298,8 +296,8 @@ Therefore
 
 $$
 \begin{align}
-\frac{\partial L}{\partial x_{0,0}} &= \frac{\partial L}{\partial \sigma^2} \frac{\partial \sigma^2}{\partial x_{0,0}} \\
-& = \left(\frac{\partial L}{\partial \sigma^2}\right)_{0} \frac{2}{N} (x_{0,0} - \frac{1}{N}\sum_{i=0}^{N-1} x_{i,0})
+\frac{\partial L}{\partial x_{0,0}} &= \frac{\partial L}{\partial \sigma^2} \frac{\partial \sigma^2}{\partial x_{0,0}} \nonumber \\
+& = \left(\frac{\partial L}{\partial \sigma^2}\right)_{0} \frac{2}{N} (x_{0,0} - \mu_0)
 \end{align}
 $$
 
@@ -308,7 +306,7 @@ Rewiriting in a more readable format
 $$
 \begin{align}
 \frac{\partial L}{\partial x_{0,0}} 
-& = \frac{2}{N} (x_{0,0} - \frac{1}{m}\sum_{i=0}^{N-1} x_{i,0}) \left(\frac{\partial L}{\partial \sigma^2}\right)_{0}
+& = \frac{2}{N} (x_{0,0} - \mu_0) \left(\frac{\partial L}{\partial \sigma^2}\right)_{0}
 \end{align}
 $$
 
@@ -317,13 +315,11 @@ We can similarly show that
 $$
 \begin{align}\label{eqn:grad_L_x}
 \frac{\partial L}{\partial x_{k,j}} 
-& = \frac{2}{N} (x_{k,j} - \frac{1}{N}\sum_{i=0}^{N-1} x_{i,j}) \left(\frac{\partial L}{\partial \sigma^2}\right)_{j}
+& = \frac{2}{N} (x_{k,j} - \mu_j) \left(\frac{\partial L}{\partial \sigma^2}\right)_{j}
 \end{align}
 $$
 
-where $$k \in N-1$$ and $$j \in D-1$$. We can rewrite the equation above a bit more silmply:
-
-Rewriting Eq. \ref{eqn:grad_L_x} in matrix form
+where $$k \in N-1$$ and $$j \in D-1$$. We can rewrite the equation above in matrix form
 
 $$
 \begin{align}
@@ -336,7 +332,7 @@ Taking the result for $$\frac{\partial L}{\partial \sigma^2}$$ into account.
 $$ 
 \begin{align}
 \frac{\partial L}{\partial x}  & = \frac{2}{N} (x - \mu) \left(-\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma b\right) \frac{1}{d^{2}}\frac{1}{2}\frac{1}{\sqrt{c}}\right) \nonumber \\
-& = -\frac{2}{m} (x - \mu) \left(\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma b\right) \frac{1}{d^{2}}\frac{1}{2}\frac{1}{\sqrt{c}}\right)
+& = -\frac{2}{N} (x - \mu) \left(\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma b\right) \frac{1}{d^{2}}\frac{1}{2}\frac{1}{\sqrt{c}}\right)
 \end{align}
 $$
 
@@ -349,7 +345,7 @@ This is the derivative from just one stream, now we need to follow the other str
 $$
 \begin{align}
 \frac{\partial L}{\partial b} &= \frac{\partial L}{\partial f}\frac{\partial f}{\partial b} \nonumber \\
-&=\frac{\partial L}{\partial y}\gamma \frac{\partial (b*e)}{\partial b} \nonumber \\
+&=\frac{\partial L}{\partial y}\gamma \frac{\partial (be)}{\partial b} \nonumber \\
 &=\frac{\partial L}{\partial y}\gamma e, \text{This will be a } N \times D \text{ matrix.}
 \end{align}
 $$
@@ -410,10 +406,11 @@ This also need to be solved in an element wise fashion
 $$
 \begin{align}
 \frac{\partial \mu}{\partial x_{0,0}} &= \begin{pmatrix}
-\frac{\partial \mu_0}{\partial x_{0,0}} & \frac{\partial \mu_1}{\partial x_{0,0}} & \frac{\partial \mu_2}{\partial x_{0,0}}  & \frac{\partial \mu_3}{\partial x_{0,0}} & \frac{\partial \mu_4}{\partial x_{0,0}}
+\frac{\partial \mu_0}{\partial x_{0,0}} & \frac{\partial \mu_1}{\partial x_{0,0}} & 
+\dots & \frac{\partial \mu_{D-2}}{\partial x_{0,0}} & \frac{\partial \mu_{D-1}}{\partial x_{0,0}}
 \end{pmatrix} \nonumber \\
 &= \begin{pmatrix}
-1/N & 0 & 0  & 0 & 0
+1/N & 0 & \dots & 0 & 0
 \end{pmatrix}
 \end{align}
 $$
@@ -422,7 +419,7 @@ Therefore
 
 $$
 \begin{align}
-\frac{\partial L}{\partial x_{0,0}} &= \left( \frac{\partial L}{\partial \mu} \right)_{0,0}*\frac{1}{N}
+\frac{\partial L}{\partial x_{0,0}} &= \frac{1}{N}\left( \frac{\partial L}{\partial \mu} \right)_{0,0}
 \end{align}
 $$
 
@@ -463,7 +460,7 @@ $$
 and using Eq. \ref{eq:grad_L_mu}
 
 $$
-\begin{align}
+\begin{align}\label{eqn:grad_l_x_stream2}
 \frac{\partial L}{\partial x} &= -\frac{1}{N}\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma e\right) \\
 \end{align}
 $$
@@ -482,21 +479,28 @@ This also needs to be looked at in an element wise fashion
 
 $$
 \begin{align}
-\frac{\partial b}{\partial x_{0,0}} &= 
+\frac{\partial b}{\partial \partial x_{0,0}} &=
 \begin{pmatrix}
-\frac{\partial(x_{0,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{0,1} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{0,2} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{0,3} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{0,4} - \mu_0)}{\partial x_{0,0}} \\
-\frac{\partial(x_{1,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{1,1} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{1,2} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{1,3} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{1,4} - \mu_0)}{\partial x_{0,0}} \\
-\frac{\partial(x_{2,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{2,1} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{2,2} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{2,3} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{2,4} - \mu_0)}{\partial x_{0,0}}
+\frac{\partial(x_{0,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{0,1} - \mu_1)}{\partial x_{0,0}} 
+& \dots & \frac{\partial(x_{0,D-2} - \mu_{D-2})}{\partial x_{0,0}} & \frac{\partial(x_{0,D-1} - \mu_{D-1})}{\partial x_{0,0}} \\
+\frac{\partial(x_{1,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{1,1} - \mu_1)}{\partial x_{0,0}} 
+& \dots & \frac{\partial(x_{1,D-2} - \mu_{D-2})}{\partial x_{0,0}} & \frac{\partial(x_{1,D-1} - \mu_{D-1})}{\partial \mu_{0}} \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+\frac{\partial(x_{N-1,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{N-1,1} - \mu_1)}{\partial x_{0,0}} 
+& \dots & \frac{\partial(x_{N-1,D-2} - \mu_{D-2})}{\partial x_{0,0}} & \frac{\partial(x_{N-1,D-1} - \mu_{D-1})}{\partial x_{0,0}}
 \end{pmatrix} \nonumber \\
 &=\begin{pmatrix}
-1 & 0 & 0 & 0 & 0 \\
-0 & 0 & 0 & 0 & 0 \\
-0 & 0 & 0 & 0 & 0 \\
+1 & 0 & \dots & 0 & 0 \\
+0 & 0 & \dots & 0 & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & \dots & 0 & 0 \\
 \end{pmatrix}
 \end{align}
 $$
 
-so a
+Note that even though $$x_{0,0}$$ is used to calculate $$\mu_0$$ we don't need to worry about that here as 
+we already took that into account when deriving Eq. \ref{eqn:grad_l_x_stream2}. Using the equation above we 
+can see that
 
 $$
 \begin{align}
@@ -504,7 +508,7 @@ $$
 \end{align}
 $$
 
-We can rewrite this in matrix form
+And now the matrix form emerges clearly
 
 $$
 \begin{align}
@@ -513,11 +517,13 @@ $$
 \end{align}
 $$
 
-Now we can sum all the streams without any simplification
+## Sum all the Streams
+
+Now we can sum all the streams and obtain the following result without any simplification
 
 $$
 \begin{align}
-\frac{\partial L}{\partial x} &= -\frac{2}{m} (x - \mu) \left(\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma b\right) \frac{1}{d^{2}}\frac{1}{2}\frac{1}{\sqrt{c}}\right) -\frac{1}{N}\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma e\right) +\frac{\partial L}{\partial y}\gamma e
+\frac{\partial L}{\partial x} &= -\frac{2}{N} (x - \mu) \left(\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma b\right) \frac{1}{d^{2}}\frac{1}{2}\frac{1}{\sqrt{c}}\right) -\frac{1}{N}\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma e\right) +\frac{\partial L}{\partial y}\gamma e
 \end{align}
 $$
 
@@ -564,7 +570,7 @@ $$
 \end{align}
 $$
 
-I will use the matrix given in Eq. \ref{eqn:xhat} for this derivation. Lets look at 
+For simplicity, I will use the matrix given in Eq. \ref{eqn:xhat} for this derivation. Lets look at 
 $$\frac{\partial \hat{x}}{\partial x_{0,0}}$$ first to get a sense what the solution would look like:
 
 $$
@@ -617,9 +623,9 @@ $$
 &=\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \frac{\partial \left(x_{0,0} - \mu_0 \right)}{\partial x_{0,0}} - 
 \left(x_{0,0} - \mu_0 \right) \frac{\partial \sqrt{ \sigma_{0}^{2} + \epsilon }}{\partial x_{0,0}} }
 {\left(\sqrt{\sigma_{0}^2 + \epsilon}\right)^2} \nonumber \\
-&=\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left(1 - \frac{1}{m}\right) - 
+&=\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left(1 - \frac{1}{N}\right) - 
 \left(x_{0,0} - \mu_0 \right)\frac{1}{2}\frac{1}{\sqrt{\sigma_{0}^{2} + \epsilon}} \frac{2}{N}( x_{0,0} - \mu_0 ) }{\sigma_{0}^2 + \epsilon} \nonumber \\
-&=\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left(1 - \frac{1}{m}\right) - 
+&=\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left(1 - \frac{1}{N}\right) - 
 \frac{1}{N}\frac{1}{\sqrt{\sigma_{0}^{2} + \epsilon}}\left(x_{0,0} - \mu_0 \right)( x_{0,0} - \mu_0 ) }{\sigma_{0}^2 + \epsilon}
 \end{align}
 $$
@@ -628,9 +634,9 @@ We can simlary show that
 
 $$
 \begin{align}
-\frac{\partial\left( \frac{x_{1,0} - \mu_{0}}{\sqrt{\sigma_{0}^2 + \epsilon}} \right) }{\partial x_{0,0}} =\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left(- \frac{1}{m}\right) - 
+\frac{\partial\left( \frac{x_{1,0} - \mu_{0}}{\sqrt{\sigma_{0}^2 + \epsilon}} \right) }{\partial x_{0,0}} =\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left(- \frac{1}{N}\right) - 
 \frac{1}{N}\frac{1}{\sqrt{\sigma_{0}^{2} + \epsilon}}\left(x_{1,0} - \mu_0 \right)( x_{0,0} - \mu_0 ) }{\sigma_{0}^2 + \epsilon} \\
-\frac{\partial\left( \frac{x_{2,0} - \mu_{0}}{\sqrt{\sigma_{0}^2 + \epsilon}} \right) }{\partial x_{0,0}} =\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left( - \frac{1}{m}\right) - 
+\frac{\partial\left( \frac{x_{2,0} - \mu_{0}}{\sqrt{\sigma_{0}^2 + \epsilon}} \right) }{\partial x_{0,0}} =\frac{ \sqrt{ \sigma_{0}^{2} + \epsilon } \left( - \frac{1}{N}\right) - 
 \frac{1}{N}\frac{1}{\sqrt{\sigma_{0}^{2} + \epsilon}}\left(x_{2,0} - \mu_0 \right)( x_{0,0} - \mu_0 ) }{\sigma_{0}^2 + \epsilon}
 \end{align}
 $$
@@ -668,27 +674,17 @@ We can similarly show that,
 
 $$
 \begin{align}
-\frac{\partial L}{\partial x_{1,0}} =& \left(\frac{\partial L}{\partial y}\gamma\right)_{1,0}\frac{1}{\sqrt{v_0}} \nonumber \\
-&+ \frac{1}{Nv_0^{3/2}} \left(-v_0\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0} - ( x_{1,0} - \mu_0 )\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
-( x_{i,0} - \mu_0 ) \right)
-\end{align}
-$$
-
-and the general result will be
-
-$$
-\begin{align}
 \frac{\partial L}{\partial x_{k,j}} =& \left(\frac{\partial L}{\partial y}\gamma\right)_{k,j}\frac{1}{\sqrt{v_j}} \nonumber \\
 &+ \frac{1}{Nv_j^{3/2}} \left( -v_j\sum_{j=0}^{N-1}\left(\frac{\partial L}{\partial y}\gamma\right)_{k,j} - 1( x_{k,j} - \mu_0 )\sum_{i=0}^{N-1}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
 ( x_{k,j} - \mu_j ) \right)
 \end{align}
 $$
 
-where $$k \in N-1$$ and $$j \in D-1$$. Now writing the result in matrix form:
+where $$k \in N-1$$ and $$j \in D-1$$. We can write the result above in matrix form:
 
 $$
 \begin{align}
-\frac{\partial L}{\partial x} =& \left(\frac{\partial L}{\partial y}\gamma\right)\frac{1}{\sqrt{v}} \\
+\frac{\partial L}{\partial x} =& \left(\frac{\partial L}{\partial y}\gamma\right)\frac{1}{\sqrt{v}} \nonumber \\
 &+ \frac{1}{Nv^{3/2}} \left( -v\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma\right) - ( x - \mu )\sum^{axis=0}\left(\frac{\partial L}{\partial y}\gamma\right)
 ( x - \mu ) \right)
 \end{align}
@@ -748,7 +744,7 @@ The backward pass formula will be
 
 $$
 \begin{align}
-\frac{\partial L}{\partial x} =& \left(\frac{\partial L}{\partial y}\gamma\right)\frac{1}{\sqrt{v}} \\
+\frac{\partial L}{\partial x} =& \left(\frac{\partial L}{\partial y}\gamma\right)\frac{1}{\sqrt{v}} \nonumber \\
 &+ \frac{1}{Nv^{3/2}} \left( -v\sum^{axis=1}\left(\frac{\partial L}{\partial y}\gamma\right) - ( x - \mu )\sum^{axis=1}\left(\frac{\partial L}{\partial y}\gamma\right)
 ( x - \mu ) \right)
 \end{align}
