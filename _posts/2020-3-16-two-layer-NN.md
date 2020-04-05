@@ -167,4 +167,4 @@ grads['b1'] = grad_L_wrt_b1
 grads['W2'] = grad_L_wrt_W2 + 2 * reg * W2
 grads['b2'] = grad_L_wrt_b2
 ```
-To see the fully completed assignment, see [here](https://github.com/usmanr149/CS231n/blob/master/assignment1/two_layer_net.ipynb).
+Check out the full assignment <a href="https://github.com/usmanr149/CS231n/blob/master/assignment1/two_layer_net.ipynb" target="_blank">here</a>

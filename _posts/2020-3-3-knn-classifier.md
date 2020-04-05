@@ -143,4 +143,4 @@ As stated in the assignment notes:
 # and might even see a slow-down.
 ```
 
-To see the full assignment, see [here](https://github.com/usmanr149/CS231n/blob/master/assignment1/knn.ipynb).
+Check out the full assignment <a href="https://github.com/usmanr149/CS231n/blob/master/assignment1/knn.ipynb" target="_blank">here</a>
