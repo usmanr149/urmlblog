@@ -340,15 +340,17 @@ This is the derivative from just one stream, now we need to follow the other str
 
 ### The Other Stream
 
-![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_Backward_4.png)
+![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_Backward_5.png)
 
 $$
 \begin{align}
 \frac{\partial L}{\partial b} &= \frac{\partial L}{\partial f}\frac{\partial f}{\partial b} \nonumber \\
 &=\frac{\partial L}{\partial y}\gamma \frac{\partial (be)}{\partial b} \nonumber \\
-&=\frac{\partial L}{\partial y}\gamma e, \text{This will be a } N \times D \text{ matrix.}
+&=\frac{\partial L}{\partial y}\gamma e \label{eqn:grad_L_b}, \text{This will be a } N \times D \text{ matrix.}
 \end{align}
 $$
+
+
 
 $$
 \begin{align}
@@ -465,9 +467,9 @@ $$
 \end{align}
 $$
 
-Now the last stream
+## The Last Stream
 
-![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_Backward_5.png)
+![_config.yml]({{ site.baseurl }}/images/FC_NN/Batchnorm_Backward_4.png)
 
 $$
 \begin{align}
@@ -508,7 +510,7 @@ $$
 \end{align}
 $$
 
-And now the matrix form emerges clearly
+Using Eq. \ref{eqn:grad_L_b} the matrix form emerges clearly
 
 $$
 \begin{align}
