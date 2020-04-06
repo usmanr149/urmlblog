@@ -381,7 +381,8 @@ $$
 \end{align}
 $$
 
-therefore
+Note that even though $$\mu_0$$ is dependent on $$x_{j,0}$$ (where $$j \in D-1$$) we don't need to take that 
+into account here as it will come into play in the other stream backprop calculated in the next section. 
 
 $$
 \begin{align}
@@ -481,7 +482,7 @@ This also needs to be looked at in an element wise fashion
 
 $$
 \begin{align}
-\frac{\partial b}{\partial \partial x_{0,0}} &=
+\frac{\partial b}{\partial x_{0,0}} &=
 \begin{pmatrix}
 \frac{\partial(x_{0,0} - \mu_0)}{\partial x_{0,0}} & \frac{\partial(x_{0,1} - \mu_1)}{\partial x_{0,0}} 
 & \dots & \frac{\partial(x_{0,D-2} - \mu_{D-2})}{\partial x_{0,0}} & \frac{\partial(x_{0,D-1} - \mu_{D-1})}{\partial x_{0,0}} \\
