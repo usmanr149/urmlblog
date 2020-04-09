@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Implement and Apply a k-Nearest Neighbor (kNN) Classifier -- Exercise
+title: Implement and Apply a k-Nearest Neighbor (kNN) Classifier -- CS231n Exercise
 categories: [CS231n assignments]
 tags: [kNN, CS231n, cifar-10]
 ---

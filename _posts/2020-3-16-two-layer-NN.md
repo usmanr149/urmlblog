@@ -1,7 +1,8 @@
 ---
 layout: post
-title: Implementing a Two Layer Neural Network -- Exercise
+title: Implementing a Two Layer Neural Network -- CS231n Exercise
 categories: [CS231n assignments]
+tags: [Neural Networks, CS231n]
 ---
 
 <p class="message">

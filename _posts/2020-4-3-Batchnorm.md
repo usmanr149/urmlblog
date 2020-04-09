@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Batch Normalization -- Exercise
+title: Batch Normalization -- CS231n Exercise
 categories: [CS231n assignments]
-tags: [Fully-Connected, CS231n, Neural Network, Batchnorm]
+tags: [CS231n, Neural Networks, Batchnorm, Batch Normalization, Layer Normalization]
 ---
 
 <p class="message">
