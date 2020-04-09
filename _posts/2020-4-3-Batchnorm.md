@@ -664,11 +664,11 @@ $$
 \frac{1}{N}\frac{1}{\sqrt{v_0}}\left(x_{1,0} - \mu_0 \right)( x_{0,0} - \mu_0 ) }{v} \nonumber \\
 &+\left(\frac{\partial L}{\partial y}\gamma\right)_{2,0} \frac{ \sqrt{ v_0 } \left( - \frac{1}{N}\right) - 
 \frac{1}{N}\frac{1}{\sqrt{v_0}}\left(x_{2,0} - \mu_0 \right)( x_{0,0} - \mu_0 ) }{v} \nonumber \\
-&= \left(\frac{\partial L}{\partial y}\gamma\right)_{0,0}\frac{1}{\sqrt{v_0}} + \frac{-1}{N(\sqrt{v})}\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0} \nonumber \\
-+& \frac{-1}{N(v_0^{3/2})}( x_{0,0} - \mu_0 )\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
+=& \left(\frac{\partial L}{\partial y}\gamma\right)_{0,0}\frac{1}{\sqrt{v_0}} + \frac{-1}{N(\sqrt{v})}\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0} \nonumber \\
+&+ \frac{-1}{N(v_0^{3/2})}( x_{0,0} - \mu_0 )\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
 ( x_{i,0} - \mu_0 ) \nonumber \\
-& = \left(\frac{\partial L}{\partial y}\gamma\right)_{0,0}\frac{1}{\sqrt{v_0}} \nonumber \\
-+& \frac{1}{v_0^{3/2}} \left( \frac{-v_0}{N}\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0} + \frac{-1}{N}( x_{0,0} - \mu_0 )\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
+=& \left(\frac{\partial L}{\partial y}\gamma\right)_{0,0}\frac{1}{\sqrt{v_0}} \nonumber \\
+&+ \frac{1}{v_0^{3/2}} \left( \frac{-v_0}{N}\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0} + \frac{-1}{N}( x_{0,0} - \mu_0 )\sum_{i=0}^{2}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
 ( x_{i,0} - \mu_0 ) \right)
 \end{align}
 $$
@@ -678,7 +678,7 @@ We can similarly show that,
 $$
 \begin{align}
 \frac{\partial L}{\partial x_{k,j}} =& \left(\frac{\partial L}{\partial y}\gamma\right)_{k,j}\frac{1}{\sqrt{v_j}} \nonumber \\
-&+ \frac{1}{Nv_j^{3/2}} \left( -v_j\sum_{j=0}^{N-1}\left(\frac{\partial L}{\partial y}\gamma\right)_{k,j} - 1( x_{k,j} - \mu_0 )\sum_{i=0}^{N-1}\left(\frac{\partial L}{\partial y}\gamma\right)_{i,0}
+&+ \frac{1}{Nv_j^{3/2}} \left( -v_j\sum_{j=0}^{N-1}\left(\frac{\partial L}{\partial y}\gamma\right)_{k,j} - ( x_{k,j} - \mu_0 )\sum_{j=0}^{N-1}\left(\frac{\partial L}{\partial y}\gamma\right)_{k,j}
 ( x_{k,j} - \mu_j ) \right)
 \end{align}
 $$
