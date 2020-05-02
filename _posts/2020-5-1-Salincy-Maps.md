@@ -5,6 +5,8 @@ categories: [CNN]
 tags: [Saliency Maps, CNN]
 ---
 
+![_config.yml]({{ site.baseurl }}/images/saliencyMap/dog_saliency_map.png)
+
 ## What are Saliency Maps?
 
 Saliency maps is a technique to rank the pixels in an image based on their contribution to the final 
