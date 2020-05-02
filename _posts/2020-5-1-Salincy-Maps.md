@@ -43,6 +43,8 @@ import tensorflow as tf
 import tensorflow.keras as keras
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 print('tensorflow {}'.format(tf.__version__))
 print("keras {}".format(keras.__version__))
 ```
@@ -132,6 +134,7 @@ and get the class scores.
 
 ```python
 #preprocess image to get it into the right format for the model
+img = keras.preprocessing.image.img_to_array(_img)
 img = img.reshape((1, *img.shape))
 y_pred = model.predict(img)
 ```
@@ -186,7 +189,7 @@ fig.colorbar(i)
 
 ![_config.yml]({{ site.baseurl }}/images/saliencyMap/output_13_1.png)
 
-The cats face, paws and some background on the bottom-left contribute the most to its top class score.
+The cats face, backgroung near the paws and some background on the bottom-left contribute the most to its top class score.
 
 Check out the full notebook <a href='https://github.com/usmanr149/Saliency-Maps-in-TF-2.0' target="_blank">here</a>
 
