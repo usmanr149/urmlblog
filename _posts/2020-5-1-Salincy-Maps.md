@@ -130,9 +130,9 @@ plt.show()
 
 ![_config.yml]({{ site.baseurl }}/images/saliencyMap/output_3_0.png)
 
-Run the model to get the predictions. The last layer of the VGG16 model gives a class score 
-for each class. The image we have loaded needs to be preprocessed before we can submit it to the model
-and get the class scores.
+The image we have loaded needs to be preprocessed before we can submit it to the model
+and get the class scores. The last layer of the VGG16 model gives a score for each class.
+Run the model to get the predictions.
 
 ```python
 #preprocess image to get it into the right format for the model
@@ -141,10 +141,10 @@ img = img.reshape((1, *img.shape))
 y_pred = model.predict(img)
 ```
 
-The top-1 prediction is a 285, which is equivalent to a Egyptian Cat 
-(see <a href='https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a' target="_blank">here</a> . 
+The highest class score is at index 285, which is equivalent to an Egyptian Cat 
+(see <a href='https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a' target="_blank">here</a>). 
 We can calculate the gradient with respect to the top class score to see which pixels in the 
-image contribute the most to the top class:
+image contribute the most:
 
 ```python
 images = tf.Variable(img, dtype=float)
@@ -160,7 +160,8 @@ grads = tape.gradient(loss, images)
 dgrad_abs = tf.math.abs(grads)
 ```
 
-To get the salincy map we need to find the max grad along each RGB channels
+To get the saliency map we need to find the max of the absolute values of the gradient 
+along each RGB channel
 
 ```python
 dgrad_max_ = np.max(dgrad_abs, axis=3)[0]
@@ -191,7 +192,7 @@ fig.colorbar(i)
 
 ![_config.yml]({{ site.baseurl }}/images/saliencyMap/output_13_1.png)
 
-The cats face, backgroung near the paws and some background on the bottom-left contribute the most to its top class score.
+The cats face, background near the paws and some background on the bottom-left contribute the most to its top class score.
 
 Check out the full notebook <a href='https://github.com/usmanr149/Saliency-Maps-in-TF-2.0' target="_blank">here</a>
 
