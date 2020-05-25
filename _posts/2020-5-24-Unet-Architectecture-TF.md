@@ -39,11 +39,11 @@ cropping.
 
 I haven't really seen this method used in any other convolution neural network (CNN) architecture and the 
 authors don't provide any reason to use this. I tried both the cropping method as oulined in the paper
-and a modiefied non-cropping U-Net on the Carvana data set, their was no difference in performance. 
-The non-cropping architecture can be applied to any image size without have to worry about the size of 
+and a modified non-cropping U-Net on the Carvana data set, their was no difference in performance. 
+The non-cropping architecture can be applied to any image size without needing to worry about the size of 
 cropping and that is why I ended up using it for all of my tests.
 
-Here is the non-cropped implementation of U-Net in Tensorflow 2.0.
+Here is the non-cropped implementation of U-Net CNN in Tensorflow 2.0.
 
 ```python
 from tensorflow.keras.models import *
