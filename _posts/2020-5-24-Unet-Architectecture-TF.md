@@ -2,14 +2,14 @@
 layout: post
 title: U-NET Convolution Neural Network for Semantic Segmentation
 categories: [CNN]
-tags: [U-Net, CNN, Tensorflow, Deep Learning, Image Segmentation]
+tags: [U-Net, CNN, Tensorflow, Deep Learning, Image Segmentation, Semantic Segmentation]
 ---
 
 ![_config.yml]({{ site.baseurl }}/images/unet/Image_Segmentation.jpg)
 
-## What is Image Segmentation?
+## What is Semantic Segmentation?
 
-Semantic Segmentation, also called pixel-based classification, is a technique in which each pixel in an 
+Semantic Segmentation, also called image segmentation or pixel-based classification, is a technique in which each pixel in an 
 image is classified as belonging to a particular class. Deep learning methods have been very successful 
 at image segmentation and U-Net is one of the most well-recognnized image segmentation algorithms. U-Net
 was originally designed for use in biomedical image segmentation and was used to win the ISBI cell tracking 
@@ -100,18 +100,18 @@ def unet(input_img):
     return c19
 
 #Initialize the model with the input shape
-input_img = Input(shape = (576, 576, 3))
+input_img = Input(shape = (432, 288, 3))
 model = Model(input_img, unet(input_img))
 ```
 
-I applied this model to the Carvana Image Masking Challenge. The images in the training set were scaled 
-to 432x288 to save time on training. No data augmentation technique was applied. The algorithm performed 
+I applied this model to the Carvana Image Masking Challenge. The images in the training set were scaled down
+to 432x288 to save time on training, no data augmentation technique was applied and the algorithm still performed 
 pretty well:
 
 ![_config.yml]({{ site.baseurl }}/images/unet/carvana_score.png)
 *Results of the U-Net algorithm trained on scaled down images from Carvana Image Masking Challenge.*
 
-This is pretty good, I am sure you can improve this result further by not downscaling as much as I did
+I am sure you can improve this result further by not downscaling as much as I did
 and trying some image augmentation.
 
 ## References
