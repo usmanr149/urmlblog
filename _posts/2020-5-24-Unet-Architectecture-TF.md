@@ -12,8 +12,8 @@ tags: [U-Net, CNN, Tensorflow, Deep Learning, Image Segmentation, Semantic Segme
 Semantic Segmentation, also called image segmentation or pixel-based classification, is a technique in which each pixel in an 
 image is classified as belonging to a particular class. Deep learning methods have been very successful 
 at image segmentation and U-Net is one of the most well-recognnized image segmentation algorithms. U-Net
-was originally designed for use in biomedical image segmentation and was used to win the ISBI cell tracking 
-challenge 2015. The architecture consists of a contracting path to capture context and then a symmetric 
+was originally designed for use in biomedical image segmentation and was used to win the <a href='https://lmb.informatik.uni-freiburg.de/people/ronneber/isbi2015/' target='_blank'>cell tracking 
+challenge at ISBI 2015</a>. The architecture consists of a contracting path to capture context and then a symmetric 
 expanding path to enable localization, giving it a U-shape when drawn:
 
 ![_config.yml]({{ site.baseurl }}/images/unet/Unet.png)
@@ -21,7 +21,7 @@ expanding path to enable localization, giving it a U-shape when drawn:
 Image Segmentation</a>.*
 
 The main idea in this architecture is to combine features from the contracting path with the upsampled 
-output from the expanding path. According to the authors the architecture works with very few images.
+output from the expanding path. According to the authors the architecture works well even with very few images.
 
 In addidtion to U-Nets success in biomedical imaging, it has been successfully used to detect 
 <a href="https://medium.com/pytorch/road-defect-detection-using-deep-active-learning-98d94fe854d" target="_blank">
@@ -38,10 +38,10 @@ cropping.
 *If you look closely you can see the faint dark blue outlines inside the blue box on the right.*
 
 I haven't really seen this method used in any other convolution neural network (CNN) architecture and the 
-authors don't provide any reason to use this. I tried both the cropping method as oulined in the paper
-and a modified non-cropping U-Net on the Carvana data set, their was no difference in performance. 
-The non-cropping architecture can be applied to any image size without needing to worry about the size of 
-cropping and that is why I ended up using it for all of my tests.
+authors don't provide any reason for cropping convolution outputs. I tried both the cropping method as oulined in the paper
+and a modified non-cropping U-Net on the <a href='https://www.kaggle.com/c/carvana-image-masking-challenge/overview' target='_blank'>Carvana data set</a>, 
+and found no difference in performance. The non-cropping version is more versatile as it can be applied to any image size without needing to worry about the size of 
+cropping dimensions and that is why I ended up using it for all of my tests.
 
 Here is the non-cropped implementation of U-Net CNN in Tensorflow 2.0.
 
@@ -104,9 +104,9 @@ input_img = Input(shape = (432, 288, 3))
 model = Model(input_img, unet(input_img))
 ```
 
-I applied this model to the Carvana Image Masking Challenge. The images in the training set were scaled down
-to 432x288 to save time on training, no data augmentation technique was applied and the algorithm still performed 
-pretty well:
+I applied this model to the <a href='https://www.kaggle.com/c/carvana-image-masking-challenge/overview' target='_blank'>Carvana Image Masking Challenge</a>. 
+The images in the training set were scaled down to 432x288 to save time on training, no data 
+augmentation technique was applied and the algorithm still performed pretty well on the test set:
 
 ![_config.yml]({{ site.baseurl }}/images/unet/carvana_score.png)
 *Results of the U-Net algorithm trained on scaled down images from Carvana Image Masking Challenge.*
