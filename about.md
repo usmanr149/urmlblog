@@ -15,6 +15,6 @@ Usman Rizwan
 
 Edmonton, Canada
 
-Email: urizwan05 [at] gmain [dot] com
+Email: urizwan05 [at] gmail [dot] com
 
 [Curriculum Vitae](https://usmanr149.github.io/usmanrizwands/)
