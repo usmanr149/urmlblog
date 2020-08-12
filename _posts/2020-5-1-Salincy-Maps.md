@@ -171,14 +171,8 @@ Normalize the grad to between 0 and 1
 
 ```python
 ## normalize to range between 0 and 1
-arr_min, arr_max  = np.min(test), np.max(test)
-grad_eval_by_hand = (dgrad_max_ - arr_min) / (arr_max - arr_min + 1e-6)
-```
-
-```python
-## normalize to range between 0 and 1
-arr_min, arr_max  = np.min(test), np.max(test)
-grad_eval = (test - arr_min) / (arr_max - arr_min + 1e-6)
+arr_min, arr_max  = np.min(dgrad_max_), np.max(dgrad_max_)
+grad_eval = (dgrad_max_ - arr_min) / (arr_max - arr_min + 1e-18)
 ```
 The output will look as follows:
 
@@ -187,7 +181,6 @@ fig, axes = plt.subplots(1,2,figsize=(14,5))
 axes[0].imshow(_img)
 i = axes[1].imshow(grad_eval,cmap="jet",alpha=0.8)
 fig.colorbar(i)
-
 ```
 
 ![_config.yml]({{ site.baseurl }}/images/saliencyMap/output_13_1.png)
