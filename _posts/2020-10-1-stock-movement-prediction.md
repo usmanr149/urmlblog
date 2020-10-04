@@ -5,7 +5,7 @@ categories: [Stocks]
 tags: [stock charts, stock prices, stock indicators, gradient boosting, regression]
 ---
 
-![_config.yml]({{ site.baseurl }}/images/stockPriceTrend/kevin-ku-w7ZyuGYNpRQ-unsplash.jpg)
+![_config.yml]({{ site.baseurl }}/images/stockPriceTrend/kevin-ku-w7ZyuGYNpRQ-unsplash.jpg){:height="60%" width="60%"}
 
 It goes without saying that having a crystal ball that tells you whether the price of a stock is 
 going to be higher or lower in the future will make you rich. A crystal ball is a pipe dream but it is possible 
@@ -264,6 +264,8 @@ The results look reasonably good. We get a pretty strong signal on Jul. 22 to se
 that 2 days later the stock drops precipitously. We also get a pretty strong signal to sell on May 14 and 15, 
 but the price rises up after May 15. So if we were holding stocks on those dates, it wouldn't have been a great idea 
 to sell at those dates as the price rises up afterwards.
+
+Check out the notebook <a href="https://github.com/usmanr149/MLForStockPrices" target="_blank">here</a>
 
 References:
 1.  Dash, R., & Dash, P. K. (2016). A hybrid stock trading framework integrating technical analysis with machine learning techniques. The Journal of Finance and Data Science, 2(1), 42–57. https://doi.org/10.1016/j.jfds.2016.03.002
