@@ -30,13 +30,39 @@ After a bit of research, I came across a very interesting paper (see
 <a href="https://reader.elsevier.com/reader/sd/pii/S2405918815300179?token=90E3E70C4CF363EDD5B941DD862110EDCE4A967CBBBD2BE8B820239B543C3EC542A44CCF998240D816521A4000C896AF" target="_blank">here</a>)
 that details a method to generate a continuous metric for a stock chart. The metric is based on the future movement
 of the stock price, its range is between 0 and 1; where 0 is a strong sell signal while 1 
-is a strong buy signal. Lets see how good the metric performs on the Intel stock price chart:
+is a strong buy signal. 
 
-{% include stockBlog/output.html  %}
+# Evaluating the Trading Signal Metric
 
-As you can see, the metric captures entry and exit points really well. Here is the Python code to generate the 
-trading signal using the methodology detailed in this 
-<a href="https://reader.elsevier.com/reader/sd/pii/S2405918815300179?token=90E3E70C4CF363EDD5B941DD862110EDCE4A967CBBBD2BE8B820239B543C3EC542A44CCF998240D816521A4000C896AF" target="_blank">paper</a>. 
+The method to evaluate the trading signal is rather straight forward. 
+
+* Calculate the 15-day moving average (MA) of the stock price.
+* If the current price is above 15-day MA and the price has been increasing consistently for the last 5-days 
+then signal trend is UP.
+* If the current price is below 15-day MA and the price has been decreasing consistently for the last 5-days 
+then signal trend is DOWN.
+
+* For UP trend, the trend signal is given by:
+
+$$
+Tr_{i} = \frac{cp_i - \text{min } cp}{\text{max } cp - \text{min } cp} * 0.5 + 0.5
+$$
+
+where
+
+$$
+\text{min } cp = \text{min } (cp_i, cp_{i+1}, cp_{i+2}) \\
+\text{max } cp = \text{max } (cp_i, cp_{i+1}, cp_{i+2})
+$$
+    
+For DOWN trend, the trend signal is given by:
+
+$$
+Tr_{i} = \frac{cp_i - \text{min } cp}{\text{max } cp - \text{min } cp} * 0.5
+$$
+
+Here is the Python code to generate the 
+trading signal using this method.
 I am going to be using
 <a href="https://github.com/mrjbq7/ta-lib" target="_blank">ta-lib</a>, an 
 incredibly fast wrapper for Python that includes 150+ technical indicators, to calculate the technical indicators 
@@ -65,7 +91,35 @@ for d, row in df[df.index > start_].iterrows():
         df.loc[d, 'Trend'] = 'down'
     elif sum(df[(df.index <= d) & (df.index > d - 5)].sma_15_diff > 0) == 5 and row['sma_15'] < row['Adj Close']:
         df.loc[d, 'Trend'] = 'up'
+        
+df['Trading Signal'] = 0
+
+hold = 0
+
+for d, row in df[df.index > start_].iterrows():
+    try:
+        min_ = min(df[(df.index >= d) & (df.index < d + 3)]['Adj Close'])
+        max_ = max(df[(df.index >= d) & (df.index < d + 3)]['Adj Close'])
+    except:
+        print("Can't look ahead")
+        break
+    if max_ != min_:
+        if row['Trend'] == 'up':
+            hold = 0.5
+            df.loc[d, 'Trading Signal'] = (row['Adj Close'] - min_)*0.5/(max_ - min_) + hold
+
+        elif row['Trend'] == 'down':
+            hold = 0
+            df.loc[d, 'Trading Signal'] = (row['Adj Close'] - min_)*0.5/(max_ - min_) + hold
+        else:
+            df.loc[d, 'Trading Signal'] = (row['Adj Close'] - min_)*0.5/(max_ - min_) + hold
 ```
+
+Lets see how good the metric performs on the Intel stock price chart:
+
+{% include stockBlog/output.html  %}
+
+As you can see, the metric captures entry and exit points really well. 
 
 # Lets do Machine Learning
 
@@ -75,9 +129,9 @@ algorithm to predict this metric.
 ## Identifying Features
 Before fitting an ML algorithm we need to identify features that we think will be good at predicting a stock price 
 movement. Constructing features to predict stock price movement is a very rich field, market watchers have 
-constructed hundred of indicators that they swear by. Instead of speding 
-months constructing features, we can just look up stock indicators and use them. Based on my research, 
-I have decided to use the following stock indicators:
+constructed hundred of indicators that they swear by. Instead of spending 
+months constructing features, we can just look up stock indicators that traders like and use them in our algorithm. 
+Based on my research, I have decided to use the following stock indicators:
 
 1.  Relative Change -- Price 
 2.  Relative Change -- Volume
@@ -110,10 +164,7 @@ def assignFactor(df):
     cmf_hold = ( ( df['Close'] - df['Low'] ) - ( df['High'] - df['Close'] ) ) / ( df['High'] - df['Low'] ) * df['Volume']
     df['CMF'] = cmf_hold.rolling(14).sum()/df['Volume'].rolling(14).sum()
     del cmf_hold
-    
-#     df['ChaikinOscillator'] = talib.ADOSC(df['High'], df['Low'], df['Close'], 
-#                                           df['Volume'], fastperiod=3, slowperiod=10)
-    
+        
     df['14DayStDevPrice'] = talib.STDDEV(df['Adj Close'], timeperiod=14, nbdev=1)
 
     df['upperbandPrice'], df['middlebandPrice'], df['lowerbandPrice'] = talib.BBANDS(df['Adj Close'], 
@@ -162,7 +213,7 @@ the test set has 106 data points.
 
 # Gradient Boosted Regression
 After trying a couple of different algorithms, I found that the gradient boosted regression (gbr) performs the best. 
-In this serction I will cover how to optimized the gbr algorithm.
+In this section I will cover how to optimized the gbr algorithm.
 Firstly, use random search cross validation to narrow down the range of 
 combinations of parameters where we need to optimize.
 
