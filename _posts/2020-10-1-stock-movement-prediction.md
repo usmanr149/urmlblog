@@ -214,8 +214,8 @@ the test set has 106 data points.
 # Gradient Boosted Regression
 After trying a couple of different algorithms, I found that the gradient boosted regression (gbr) performs the best. 
 In this section I will cover how to optimized the gbr algorithm.
-Firstly, use random search cross validation to narrow down the range of 
-combinations of parameters where we need to optimize.
+Firstly, use random search to narrow down the range of 
+combinations of gbr parameters that need to be optimize.
 
 ```python
 import numpy as np
@@ -259,8 +259,8 @@ for i in range(500):
         best_gbr = gbr
 ```
 
-We get a mean squared error of 0.06734 on the validation set following random search. Lets see if we can reduce 
-this error by performing grid search around the best parameters we found using random search.
+We get a mean squared error of 0.06734 on the validation set following random search. Lets see if 
+this error can be reduced further by performing grid search around the best parameters found using random search.
 
 ```python
 params = ['max_depth', 'min_samples_leaf', 'min_samples_split', 
@@ -307,14 +307,14 @@ for max_depth in param_grid['max_depth']:
 
 The mean squared error for the validation set goes down to 0.0593 after grid search optimization. 
 
-Lets apply the optimized gbr algorithm to our test set and see what the results look like.
+Lets apply the optimized gbr algorithm to the test set and see what the results look like.
 
 {% include stockBlog/final_results.html  %}
 
 The results look reasonably good. We get a pretty strong signal on Jul. 22 to sell the stock and we can see 
-that 2 days later the stock drops precipitously. We also get a pretty strong signal to sell on May 14 and 15, 
-but the price rises up after May 15. So if we were holding stocks on those dates, it wouldn't have been a great idea 
-to sell at those dates as the price rises up afterwards.
+that 2 days later the stock drops precipitously. On the other hand, we also get a pretty strong signal to sell on May 14 and 15, 
+but the price rises after May 15. So if we were holding stocks on those dates, it wouldn't have been a great idea 
+to sell.
 
 Check out the notebook <a href="https://github.com/usmanr149/MLForStockPrices" target="_blank">here</a>
 
