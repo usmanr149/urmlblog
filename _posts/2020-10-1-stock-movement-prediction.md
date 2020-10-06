@@ -6,6 +6,7 @@ tags: [stock charts, stock prices, stock indicators, gradient boosting, regressi
 ---
 
 ![_config.yml]({{ site.baseurl }}/images/stockPriceTrend/kevin-ku-w7ZyuGYNpRQ-unsplash.jpg){:height="60%" width="60%"}
+*Photo by [Kevin Ku](https://unsplash.com/@ikukevk?utm_source=medium&utm_medium=referral) on Unsplash*
 
 It goes without saying that having a crystal ball that tells you whether the price of a stock is 
 going to be higher or lower in the future will make you rich. A crystal ball is a pipe dream but it is possible 
