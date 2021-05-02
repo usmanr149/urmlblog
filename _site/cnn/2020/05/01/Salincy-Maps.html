@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="https://gmpg.org/xfn/11" rel="profile" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+  <title>
+    
+      Saliency Maps in Tensorflow 2.0 &middot; UR Machine Learning Blog
+    
+  </title>
+
+  
+
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/urmlblog/assets/css/main.css" />
+  
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface" />
+
+  <!-- Icons -->
+<!--  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/urmlblog/favicon.png" />
+<link rel="shortcut icon" href="/urmlblog/favicon.ico" />-->
+
+  <!-- RSS -->
+<!--  <link rel="alternate" type="application/rss+xml" title="RSS" href="/urmlblog/feed.xml" />-->
+
+  <!-- Additional head bits without overriding original head -->
+</head>
+
+
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: { equationNumbers: { autoNumber: "all" } }
+  });
+  MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+<!--  MathJax.Hub.Config({-->
+<!--    jax: ["input/TeX","output/HTML-CSS"],-->
+<!--    displayAlign: "left"-->
+<!--  });-->
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/urmlblog/favicon.png" />
+<link rel="shortcut icon" href="/urmlblog/favicon.ico" />
+
+  <body class="post">
+
+    <div id="sidebar">
+  <header>
+    <div class="site-title">
+      <a href="/urmlblog/">
+        
+          <span class="back-arrow icon"><svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+</svg></span>
+        
+        UR Machine Learning Blog
+      </a>
+    </div>
+    <p class="lead">Data Scientist at City of Edmonton</p>
+  </header>
+  <nav id="sidebar-nav-links">
+  
+    <a class="home-link "
+        href="/urmlblog/">Home</a>
+  
+  
+
+  
+
+  
+
+
+  
+    
+  
+
+  
+    
+      <a class="page-link "
+          href="/urmlblog/about.html">About</a>
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+
+  
+
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+      <a class="category-link "
+          href="/urmlblog/category/categories.html">Categories</a>
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+
+  <!-- Optional additional links to insert in sidebar nav -->
+</nav>
+
+
+  
+
+  <nav id="sidebar-icon-links">
+  
+
+<!--  <a id="subscribe-link"-->
+<!--     class="icon" title="Subscribe" aria-label="Subscribe"-->
+<!--     href="/urmlblog/feed.xml">-->
+<!--    <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <circle cx="6.18" cy="17.82" r="2.18"/>
+    <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+</svg>-->
+<!--  </a>-->
+
+  
+  
+  
+  
+
+  <a id="linkedin-link"
+       title="Linkedin" aria-label="linkedin" class="icon" target="_blank"
+       href="https://www.linkedin.com/in/usman-rizwan-data-magic/">
+      <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24pt" height="24pt" viewBox="0 0 24 24" version="1.1">
+<defs>
+<filter id="alpha" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+  <feColorMatrix type="matrix" in="SourceGraphic" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+</filter>
+<mask id="mask0">
+  <g filter="url(#alpha)">
+<rect x="0" y="0" width="24" height="24" style="fill:rgb(0%,0%,0%);fill-opacity:0.780392;stroke:none;"/>
+  </g>
+</mask>
+<linearGradient id="linear0" gradientUnits="userSpaceOnUse" x1="-808.8727" y1="199.8918" x2="-860.5692" y2="49.2029" gradientTransform="matrix(-0.0554531,0,0,-0.0554531,-38.267222,8.831372)">
+<stop offset="0" style="stop-color:rgb(100%,100%,100%);stop-opacity:1;"/>
+<stop offset="1" style="stop-color:rgb(100%,100%,100%);stop-opacity:0;"/>
+</linearGradient>
+<clipPath id="clip1">
+  <rect width="24" height="24"/>
+</clipPath>
+<g id="surface6" clip-path="url(#clip1)">
+<path style=" stroke:none;fill-rule:nonzero;fill:url(#linear0);" d="M 17.195312 1.925781 L 6.804688 1.925781 C 4.054688 1.925781 1.839844 4.160156 1.839844 6.929688 L 1.839844 17.070312 C 1.929688 19.234375 2.273438 17.863281 2.921875 15.46875 C 3.679688 12.683594 6.148438 10.246094 9.152344 8.421875 C 11.445312 7.03125 14.011719 6.140625 18.683594 6.054688 C 21.335938 6.007812 21.101562 2.617188 17.195312 1.925781 Z M 17.195312 1.925781 "/>
+</g>
+</defs>
+<g id="surface1">
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(11.372549%,54.901961%,70.980392%);fill-opacity:1;" d="M 19.6875 0.984375 L 4.3125 0.984375 C 2.472656 0.984375 0.984375 2.472656 0.984375 4.3125 L 0.984375 19.6875 C 0.984375 21.527344 2.472656 23.015625 4.3125 23.015625 L 19.6875 23.015625 C 21.527344 23.015625 23.015625 21.527344 23.015625 19.6875 L 23.015625 4.3125 C 23.015625 2.472656 21.527344 0.984375 19.6875 0.984375 Z M 19.6875 0.984375 "/>
+<use xlink:href="#surface6" mask="url(#mask0)"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 7.648438 19.476562 L 7.648438 9.515625 L 4.339844 9.515625 L 4.339844 19.476562 Z M 5.996094 8.15625 C 7.148438 8.15625 7.867188 7.390625 7.867188 6.433594 C 7.847656 5.457031 7.148438 4.710938 6.015625 4.710938 C 4.882812 4.710938 4.144531 5.457031 4.144531 6.433594 C 4.144531 7.390625 4.863281 8.15625 5.972656 8.15625 Z M 5.996094 8.15625 "/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 9.484375 19.476562 L 12.792969 19.476562 L 12.792969 13.914062 C 12.792969 13.617188 12.816406 13.320312 12.902344 13.105469 C 13.144531 12.511719 13.6875 11.894531 14.601562 11.894531 C 15.800781 11.894531 16.28125 12.808594 16.28125 14.148438 L 16.28125 19.476562 L 19.589844 19.476562 L 19.589844 13.765625 C 19.589844 10.703125 17.957031 9.28125 15.777344 9.28125 C 13.992188 9.28125 13.207031 10.277344 12.773438 10.960938 L 12.792969 10.960938 L 12.792969 9.515625 L 9.484375 9.515625 C 9.527344 10.449219 9.484375 19.476562 9.484375 19.476562 Z M 9.484375 19.476562 "/>
+</g>
+</svg>
+
+    </a>
+
+    <a id="github-link"
+       title="Github" aria-label="github" class="icon" target="_blank"
+       href="https://github.com/usmanr149/">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28" height="24" width="28"><path d="M12 2c6.625 0 12 5.375 12 12 0 5.297-3.437 9.797-8.203 11.391-0.609 0.109-0.828-0.266-0.828-0.578 0-0.391 0.016-1.687 0.016-3.297 0-1.125-0.375-1.844-0.812-2.219 2.672-0.297 5.484-1.313 5.484-5.922 0-1.313-0.469-2.375-1.234-3.219 0.125-0.313 0.531-1.531-0.125-3.187-1-0.313-3.297 1.234-3.297 1.234-0.953-0.266-1.984-0.406-3-0.406s-2.047 0.141-3 0.406c0 0-2.297-1.547-3.297-1.234-0.656 1.656-0.25 2.875-0.125 3.187-0.766 0.844-1.234 1.906-1.234 3.219 0 4.594 2.797 5.625 5.469 5.922-0.344 0.313-0.656 0.844-0.766 1.609-0.688 0.313-2.438 0.844-3.484-1-0.656-1.141-1.844-1.234-1.844-1.234-1.172-0.016-0.078 0.734-0.078 0.734 0.781 0.359 1.328 1.75 1.328 1.75 0.703 2.141 4.047 1.422 4.047 1.422 0 1 0.016 1.937 0.016 2.234 0 0.313-0.219 0.688-0.828 0.578-4.766-1.594-8.203-6.094-8.203-11.391 0-6.625 5.375-12 12-12zM4.547 19.234c0.031-0.063-0.016-0.141-0.109-0.187-0.094-0.031-0.172-0.016-0.203 0.031-0.031 0.063 0.016 0.141 0.109 0.187 0.078 0.047 0.172 0.031 0.203-0.031zM5.031 19.766c0.063-0.047 0.047-0.156-0.031-0.25-0.078-0.078-0.187-0.109-0.25-0.047-0.063 0.047-0.047 0.156 0.031 0.25 0.078 0.078 0.187 0.109 0.25 0.047zM5.5 20.469c0.078-0.063 0.078-0.187 0-0.297-0.063-0.109-0.187-0.156-0.266-0.094-0.078 0.047-0.078 0.172 0 0.281s0.203 0.156 0.266 0.109zM6.156 21.125c0.063-0.063 0.031-0.203-0.063-0.297-0.109-0.109-0.25-0.125-0.313-0.047-0.078 0.063-0.047 0.203 0.063 0.297 0.109 0.109 0.25 0.125 0.313 0.047zM7.047 21.516c0.031-0.094-0.063-0.203-0.203-0.25-0.125-0.031-0.266 0.016-0.297 0.109s0.063 0.203 0.203 0.234c0.125 0.047 0.266 0 0.297-0.094zM8.031 21.594c0-0.109-0.125-0.187-0.266-0.172-0.141 0-0.25 0.078-0.25 0.172 0 0.109 0.109 0.187 0.266 0.172 0.141 0 0.25-0.078 0.25-0.172zM8.937 21.438c-0.016-0.094-0.141-0.156-0.281-0.141-0.141 0.031-0.234 0.125-0.219 0.234 0.016 0.094 0.141 0.156 0.281 0.125s0.234-0.125 0.219-0.219z"></path>
+</svg>
+
+    </a>
+
+  
+    <a id="tags-link"
+       class="icon"
+       title="Tags" aria-label="Tags"
+       href="/urmlblog/tags.html">
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+    </a>
+  
+
+  
+    <a id="search-link"
+       class="icon"
+       title="Search" aria-label="Search"
+       href="/urmlblog/search.html">
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</svg>
+    </a>
+  
+
+  <!-- Optional additional links to insert for icons links -->
+</nav>
+
+  <!--<p>-->
+<!--  &copy; 2021.-->
+<!--  <a href="/urmlblog/LICENSE.md">MIT License.</a>-->
+<!--</p>-->
+
+</div>
+
+    <main class="container">
+      <header>
+  <h1 class="post-title">Saliency Maps in Tensorflow 2.0</h1>
+</header>
+<div class="content">
+  <div class="post-meta">
+  <span class="post-date">01 May 2020</span>
+  <span class="post-categories">
+    
+      &bull;
+
+      
+      
+      
+
+      
+        CNN
+      
+    
+  </span>
+</div>
+
+
+  <div class="post-body">
+    <p><img src="/urmlblog/images/saliencyMap/dog_saliency_map.png" alt="_config.yml" /></p>
+
+<h2 id="what-are-saliency-maps">What are Saliency Maps?</h2>
+
+<p>Saliency maps is a technique to rank the pixels in an image based on their contribution to the final 
+score from a Convolution Neural Network. The technique is described in great detail in this 
+<a href="https://arxiv.org/pdf/1312.6034v2.pdf" target="_blank">paper</a>.</p>
+
+<p>For e.g. if we have a ConvNet that gives a class score \(S_c(I)\) for an image \(I\) belonging to class 
+\(c\). In a ConvNet the term \(S_c(I)\) is highly nonlinear but we can use the first-order 
+Taylor expansion to approximate it as a linear function:</p>
+
+\[S_x(I) \approx w^TI + b\]
+
+<p>where \(b\) is the bias and \(w\) defines the importance of the pixels in image \(I\) for the class \(c\)</p>
+
+\[w = \frac{\partial S_c}{\partial I}\]
+
+<p>The derivative above provids us a class saliency map for image \(I\), the magnitude of \(w\) indicates 
+which pixels need to be changed the least to affect the class score the most.</p>
+
+<p>The original paper outlining this methodology is quite old at this point and their are already a 
+couple of packages and blogs online that compute saliency maps but I have had trouble finding 
+something that is compatible with Tensorflow 2.0.</p>
+
+<p>So here I present how I computed saliency maps in Tensorflow 2.0.</p>
+
+<h2 id="compute-saliency-maps-using-tensorflow-20">Compute Saliency Maps Using Tensorflow 2.0</h2>
+
+<p>Load in the required packages and make sure that tensorflow version is &gt;=2.0:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow.keras</span> <span class="k">as</span> <span class="n">keras</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'tensorflow {}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">__version__</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"keras {}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">keras</span><span class="p">.</span><span class="n">__version__</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tensorflow 2.1.0
+keras 2.2.4-tf
+</code></pre></div></div>
+
+<p>In this example I will use the VGG16 model which you can load directly from Keras:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="p">.</span><span class="n">applications</span><span class="p">.</span><span class="n">VGG16</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="s">'imagenet'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="n">summary</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Model: "vgg16"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_1 (InputLayer)         [(None, 224, 224, 3)]     0         
+_________________________________________________________________
+block1_conv1 (Conv2D)        (None, 224, 224, 64)      1792      
+_________________________________________________________________
+block1_conv2 (Conv2D)        (None, 224, 224, 64)      36928     
+_________________________________________________________________
+block1_pool (MaxPooling2D)   (None, 112, 112, 64)      0         
+_________________________________________________________________
+block2_conv1 (Conv2D)        (None, 112, 112, 128)     73856     
+_________________________________________________________________
+block2_conv2 (Conv2D)        (None, 112, 112, 128)     147584    
+_________________________________________________________________
+block2_pool (MaxPooling2D)   (None, 56, 56, 128)       0         
+_________________________________________________________________
+block3_conv1 (Conv2D)        (None, 56, 56, 256)       295168    
+_________________________________________________________________
+block3_conv2 (Conv2D)        (None, 56, 56, 256)       590080    
+_________________________________________________________________
+block3_conv3 (Conv2D)        (None, 56, 56, 256)       590080    
+_________________________________________________________________
+block3_pool (MaxPooling2D)   (None, 28, 28, 256)       0         
+_________________________________________________________________
+block4_conv1 (Conv2D)        (None, 28, 28, 512)       1180160   
+_________________________________________________________________
+block4_conv2 (Conv2D)        (None, 28, 28, 512)       2359808   
+_________________________________________________________________
+block4_conv3 (Conv2D)        (None, 28, 28, 512)       2359808   
+_________________________________________________________________
+block4_pool (MaxPooling2D)   (None, 14, 14, 512)       0         
+_________________________________________________________________
+block5_conv1 (Conv2D)        (None, 14, 14, 512)       2359808   
+_________________________________________________________________
+block5_conv2 (Conv2D)        (None, 14, 14, 512)       2359808   
+_________________________________________________________________
+block5_conv3 (Conv2D)        (None, 14, 14, 512)       2359808   
+_________________________________________________________________
+block5_pool (MaxPooling2D)   (None, 7, 7, 512)         0         
+_________________________________________________________________
+flatten (Flatten)            (None, 25088)             0         
+_________________________________________________________________
+fc1 (Dense)                  (None, 4096)              102764544 
+_________________________________________________________________
+fc2 (Dense)                  (None, 4096)              16781312  
+_________________________________________________________________
+predictions (Dense)          (None, 1000)              4097000   
+=================================================================
+Total params: 138,357,544
+Trainable params: 138,357,544
+Non-trainable params: 0
+_________________________________________________________________
+</code></pre></div></div>
+
+<p>Load the image that you want to run the model on:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">_img</span> <span class="o">=</span> <span class="n">keras</span><span class="p">.</span><span class="n">preprocessing</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="n">load_img</span><span class="p">(</span><span class="s">'cat_front.jpeg'</span><span class="p">,</span><span class="n">target_size</span><span class="o">=</span><span class="p">(</span><span class="mi">224</span><span class="p">,</span><span class="mi">224</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">_img</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/urmlblog/images/saliencyMap/output_3_0.png" alt="_config.yml" /></p>
+
+<p>The image we have loaded needs to be preprocessed before we can submit it to the model
+and get the class scores. The last layer of the VGG16 model gives a score for each class.
+Run the model to get the predictions.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#preprocess image to get it into the right format for the model
+</span><span class="n">img</span> <span class="o">=</span> <span class="n">keras</span><span class="p">.</span><span class="n">preprocessing</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="n">img_to_array</span><span class="p">(</span><span class="n">_img</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">img</span><span class="p">.</span><span class="n">shape</span><span class="p">))</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The highest class score is at index 285, which is equivalent to an Egyptian Cat 
+(see <a href="https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a" target="_blank">here</a>). 
+We can calculate the gradient with respect to the top class score to see which pixels in the 
+image contribute the most:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">images</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">class_idxs_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">pred</span><span class="p">.</span><span class="n">numpy</span><span class="p">().</span><span class="n">flatten</span><span class="p">())[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">class_idxs_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    
+<span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="p">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">images</span><span class="p">)</span>
+</code></pre></div></div>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dgrad_abs</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">math</span><span class="p">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>To get the saliency map we need to find the max of the absolute values of the gradient 
+along each RGB channel</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dgrad_max_</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">dgrad_abs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Normalize the grad to between 0 and 1</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## normalize to range between 0 and 1
+</span><span class="n">arr_min</span><span class="p">,</span> <span class="n">arr_max</span>  <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">min</span><span class="p">(</span><span class="n">dgrad_max_</span><span class="p">),</span> <span class="n">np</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">dgrad_max_</span><span class="p">)</span>
+<span class="n">grad_eval</span> <span class="o">=</span> <span class="p">(</span><span class="n">dgrad_max_</span> <span class="o">-</span> <span class="n">arr_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">arr_max</span> <span class="o">-</span> <span class="n">arr_min</span> <span class="o">+</span> <span class="mf">1e-18</span><span class="p">)</span>
+</code></pre></div></div>
+<p>The output will look as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">imshow</span><span class="p">(</span><span class="n">_img</span><span class="p">)</span>
+<span class="n">i</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">imshow</span><span class="p">(</span><span class="n">grad_eval</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">"jet"</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/urmlblog/images/saliencyMap/output_13_1.png" alt="_config.yml" /></p>
+
+<p>The cats face, background near the paws and some background on the bottom-left contribute the most to its top class score.</p>
+
+<p>Check out the full notebook <a href="https://github.com/usmanr149/Saliency-Maps-in-TF-2.0" target="_blank">here</a></p>
+
+<h2 id="references">References</h2>
+<ol>
+  <li>Fairyonice.github.io. 2020. Saliency Map With Keras-Vis. [online] Available at: <a href="https://fairyonice.github.io/Saliency-Map-with-keras-vis.html" target="_blank">https://fairyonice.github.io/Saliency-Map-with-keras-vis.html</a> [Accessed 2 May 2020].</li>
+  <li><a href="https://arxiv.org/abs/1312.6034v2" target="_blank">https://arxiv.org/abs/1312.6034v2</a></li>
+</ol>
+
+    
+
+
+
+<div class="post-tags">
+  
+    
+    <a href="/urmlblog/tags.html#saliency-maps">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">Saliency Maps</span>
+    </a>
+  
+    
+    <a href="/urmlblog/tags.html#cnn">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">CNN</span>
+    </a>
+  
+</div>
+  </div>
+
+  
+  <section class="comments">
+    <h2>Comments</h2>
+    
+  <div id="disqus_thread">
+    <button class="disqus-load" onClick="loadDisqusComments()">
+      Load Comments
+    </button>
+  </div>
+  <script>
+
+  /**
+  *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW
+  *  TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+  *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT:s
+  *  https://disqus.com/admin/universalcode/#configuration-variables
+  */
+  var disqus_config = function () {
+    this.page.url = "http://localhost:4000/urmlblog/cnn/2020/05/01/Salincy-Maps.html";
+    this.page.identifier = "" ||
+                           "http://localhost:4000/urmlblog/cnn/2020/05/01/Salincy-Maps.html";
+  }
+  function loadDisqusComments() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//https-usmanr149-github-io-urmlblog.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  </script>
+  <noscript>
+    Please enable JavaScript to view the
+    <a href="https://disqus.com/?ref_noscript">comments powered by Disqus</a>.
+  </noscript>
+
+
+
+  </section>
+
+  <section class="related">
+  <h2>Related Posts</h2>
+  <ul class="posts-list">
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/time%20series/2021/04/30/2021-4-30-AR-model.html">
+            Autoregressive Model -- Properties of AR(1) Model
+            <small>30 Apr 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/stocks/2020/10/01/stock-movement-prediction.html">
+            Training a Machine Learning Algorithm to Predict Stock Price Movement
+            <small>01 Oct 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/cnn/2020/05/24/Unet-Architectecture-TF.html">
+            U-NET Convolution Neural Network for Semantic Segmentation
+            <small>24 May 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</section>
+
+</div>
+
+    </main>
+
+    <!-- Optional footer content -->
+
+  </body>
+</html>

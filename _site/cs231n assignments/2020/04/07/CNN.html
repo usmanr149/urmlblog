@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="https://gmpg.org/xfn/11" rel="profile" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+  <title>
+    
+      Convolution Networks -- CS231n Exercise &middot; UR Machine Learning Blog
+    
+  </title>
+
+  
+
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/urmlblog/assets/css/main.css" />
+  
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface" />
+
+  <!-- Icons -->
+<!--  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/urmlblog/favicon.png" />
+<link rel="shortcut icon" href="/urmlblog/favicon.ico" />-->
+
+  <!-- RSS -->
+<!--  <link rel="alternate" type="application/rss+xml" title="RSS" href="/urmlblog/feed.xml" />-->
+
+  <!-- Additional head bits without overriding original head -->
+</head>
+
+
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: { equationNumbers: { autoNumber: "all" } }
+  });
+  MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+<!--  MathJax.Hub.Config({-->
+<!--    jax: ["input/TeX","output/HTML-CSS"],-->
+<!--    displayAlign: "left"-->
+<!--  });-->
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/urmlblog/favicon.png" />
+<link rel="shortcut icon" href="/urmlblog/favicon.ico" />
+
+  <body class="post">
+
+    <div id="sidebar">
+  <header>
+    <div class="site-title">
+      <a href="/urmlblog/">
+        
+          <span class="back-arrow icon"><svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+</svg></span>
+        
+        UR Machine Learning Blog
+      </a>
+    </div>
+    <p class="lead">Data Scientist at City of Edmonton</p>
+  </header>
+  <nav id="sidebar-nav-links">
+  
+    <a class="home-link "
+        href="/urmlblog/">Home</a>
+  
+  
+
+  
+
+  
+
+
+  
+    
+  
+
+  
+    
+      <a class="page-link "
+          href="/urmlblog/about.html">About</a>
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+
+  
+
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+      <a class="category-link "
+          href="/urmlblog/category/categories.html">Categories</a>
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+
+  <!-- Optional additional links to insert in sidebar nav -->
+</nav>
+
+
+  
+
+  <nav id="sidebar-icon-links">
+  
+
+<!--  <a id="subscribe-link"-->
+<!--     class="icon" title="Subscribe" aria-label="Subscribe"-->
+<!--     href="/urmlblog/feed.xml">-->
+<!--    <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <circle cx="6.18" cy="17.82" r="2.18"/>
+    <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+</svg>-->
+<!--  </a>-->
+
+  
+  
+  
+  
+
+  <a id="linkedin-link"
+       title="Linkedin" aria-label="linkedin" class="icon" target="_blank"
+       href="https://www.linkedin.com/in/usman-rizwan-data-magic/">
+      <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24pt" height="24pt" viewBox="0 0 24 24" version="1.1">
+<defs>
+<filter id="alpha" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+  <feColorMatrix type="matrix" in="SourceGraphic" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+</filter>
+<mask id="mask0">
+  <g filter="url(#alpha)">
+<rect x="0" y="0" width="24" height="24" style="fill:rgb(0%,0%,0%);fill-opacity:0.780392;stroke:none;"/>
+  </g>
+</mask>
+<linearGradient id="linear0" gradientUnits="userSpaceOnUse" x1="-808.8727" y1="199.8918" x2="-860.5692" y2="49.2029" gradientTransform="matrix(-0.0554531,0,0,-0.0554531,-38.267222,8.831372)">
+<stop offset="0" style="stop-color:rgb(100%,100%,100%);stop-opacity:1;"/>
+<stop offset="1" style="stop-color:rgb(100%,100%,100%);stop-opacity:0;"/>
+</linearGradient>
+<clipPath id="clip1">
+  <rect width="24" height="24"/>
+</clipPath>
+<g id="surface6" clip-path="url(#clip1)">
+<path style=" stroke:none;fill-rule:nonzero;fill:url(#linear0);" d="M 17.195312 1.925781 L 6.804688 1.925781 C 4.054688 1.925781 1.839844 4.160156 1.839844 6.929688 L 1.839844 17.070312 C 1.929688 19.234375 2.273438 17.863281 2.921875 15.46875 C 3.679688 12.683594 6.148438 10.246094 9.152344 8.421875 C 11.445312 7.03125 14.011719 6.140625 18.683594 6.054688 C 21.335938 6.007812 21.101562 2.617188 17.195312 1.925781 Z M 17.195312 1.925781 "/>
+</g>
+</defs>
+<g id="surface1">
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(11.372549%,54.901961%,70.980392%);fill-opacity:1;" d="M 19.6875 0.984375 L 4.3125 0.984375 C 2.472656 0.984375 0.984375 2.472656 0.984375 4.3125 L 0.984375 19.6875 C 0.984375 21.527344 2.472656 23.015625 4.3125 23.015625 L 19.6875 23.015625 C 21.527344 23.015625 23.015625 21.527344 23.015625 19.6875 L 23.015625 4.3125 C 23.015625 2.472656 21.527344 0.984375 19.6875 0.984375 Z M 19.6875 0.984375 "/>
+<use xlink:href="#surface6" mask="url(#mask0)"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 7.648438 19.476562 L 7.648438 9.515625 L 4.339844 9.515625 L 4.339844 19.476562 Z M 5.996094 8.15625 C 7.148438 8.15625 7.867188 7.390625 7.867188 6.433594 C 7.847656 5.457031 7.148438 4.710938 6.015625 4.710938 C 4.882812 4.710938 4.144531 5.457031 4.144531 6.433594 C 4.144531 7.390625 4.863281 8.15625 5.972656 8.15625 Z M 5.996094 8.15625 "/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 9.484375 19.476562 L 12.792969 19.476562 L 12.792969 13.914062 C 12.792969 13.617188 12.816406 13.320312 12.902344 13.105469 C 13.144531 12.511719 13.6875 11.894531 14.601562 11.894531 C 15.800781 11.894531 16.28125 12.808594 16.28125 14.148438 L 16.28125 19.476562 L 19.589844 19.476562 L 19.589844 13.765625 C 19.589844 10.703125 17.957031 9.28125 15.777344 9.28125 C 13.992188 9.28125 13.207031 10.277344 12.773438 10.960938 L 12.792969 10.960938 L 12.792969 9.515625 L 9.484375 9.515625 C 9.527344 10.449219 9.484375 19.476562 9.484375 19.476562 Z M 9.484375 19.476562 "/>
+</g>
+</svg>
+
+    </a>
+
+    <a id="github-link"
+       title="Github" aria-label="github" class="icon" target="_blank"
+       href="https://github.com/usmanr149/">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28" height="24" width="28"><path d="M12 2c6.625 0 12 5.375 12 12 0 5.297-3.437 9.797-8.203 11.391-0.609 0.109-0.828-0.266-0.828-0.578 0-0.391 0.016-1.687 0.016-3.297 0-1.125-0.375-1.844-0.812-2.219 2.672-0.297 5.484-1.313 5.484-5.922 0-1.313-0.469-2.375-1.234-3.219 0.125-0.313 0.531-1.531-0.125-3.187-1-0.313-3.297 1.234-3.297 1.234-0.953-0.266-1.984-0.406-3-0.406s-2.047 0.141-3 0.406c0 0-2.297-1.547-3.297-1.234-0.656 1.656-0.25 2.875-0.125 3.187-0.766 0.844-1.234 1.906-1.234 3.219 0 4.594 2.797 5.625 5.469 5.922-0.344 0.313-0.656 0.844-0.766 1.609-0.688 0.313-2.438 0.844-3.484-1-0.656-1.141-1.844-1.234-1.844-1.234-1.172-0.016-0.078 0.734-0.078 0.734 0.781 0.359 1.328 1.75 1.328 1.75 0.703 2.141 4.047 1.422 4.047 1.422 0 1 0.016 1.937 0.016 2.234 0 0.313-0.219 0.688-0.828 0.578-4.766-1.594-8.203-6.094-8.203-11.391 0-6.625 5.375-12 12-12zM4.547 19.234c0.031-0.063-0.016-0.141-0.109-0.187-0.094-0.031-0.172-0.016-0.203 0.031-0.031 0.063 0.016 0.141 0.109 0.187 0.078 0.047 0.172 0.031 0.203-0.031zM5.031 19.766c0.063-0.047 0.047-0.156-0.031-0.25-0.078-0.078-0.187-0.109-0.25-0.047-0.063 0.047-0.047 0.156 0.031 0.25 0.078 0.078 0.187 0.109 0.25 0.047zM5.5 20.469c0.078-0.063 0.078-0.187 0-0.297-0.063-0.109-0.187-0.156-0.266-0.094-0.078 0.047-0.078 0.172 0 0.281s0.203 0.156 0.266 0.109zM6.156 21.125c0.063-0.063 0.031-0.203-0.063-0.297-0.109-0.109-0.25-0.125-0.313-0.047-0.078 0.063-0.047 0.203 0.063 0.297 0.109 0.109 0.25 0.125 0.313 0.047zM7.047 21.516c0.031-0.094-0.063-0.203-0.203-0.25-0.125-0.031-0.266 0.016-0.297 0.109s0.063 0.203 0.203 0.234c0.125 0.047 0.266 0 0.297-0.094zM8.031 21.594c0-0.109-0.125-0.187-0.266-0.172-0.141 0-0.25 0.078-0.25 0.172 0 0.109 0.109 0.187 0.266 0.172 0.141 0 0.25-0.078 0.25-0.172zM8.937 21.438c-0.016-0.094-0.141-0.156-0.281-0.141-0.141 0.031-0.234 0.125-0.219 0.234 0.016 0.094 0.141 0.156 0.281 0.125s0.234-0.125 0.219-0.219z"></path>
+</svg>
+
+    </a>
+
+  
+    <a id="tags-link"
+       class="icon"
+       title="Tags" aria-label="Tags"
+       href="/urmlblog/tags.html">
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+    </a>
+  
+
+  
+    <a id="search-link"
+       class="icon"
+       title="Search" aria-label="Search"
+       href="/urmlblog/search.html">
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</svg>
+    </a>
+  
+
+  <!-- Optional additional links to insert for icons links -->
+</nav>
+
+  <!--<p>-->
+<!--  &copy; 2021.-->
+<!--  <a href="/urmlblog/LICENSE.md">MIT License.</a>-->
+<!--</p>-->
+
+</div>
+
+    <main class="container">
+      <header>
+  <h1 class="post-title">Convolution Networks -- CS231n Exercise</h1>
+</header>
+<div class="content">
+  <div class="post-meta">
+  <span class="post-date">07 Apr 2020</span>
+  <span class="post-categories">
+    
+      &bull;
+
+      
+      
+      
+
+      
+        CS231n assignments
+      
+    
+  </span>
+</div>
+
+
+  <div class="post-body">
+    <p class="message">
+I am currently working my way through the lectures for 
+<a href="https://www.youtube.com/watch?v=vT1JzLTH4G4&amp;list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&amp;index=1" target="_blank">CS231n: Convolutional Neural Networks for Visual Recognition</a>.
+I will post my solutions <a href="https://usmanr149.github.io/urmlblog/" target="_blank">here</a>.
+</p>
+
+<h2 id="convolution-network">Convolution Network</h2>
+
+<p>In this assignment we are asked to construct a convolution neural network (CNN) without having to worry about optimizing it. 
+This is a great way to understand how CNNs.</p>
+
+<p>The <a href="https://cs231n.github.io/convolutional-networks/" target="_blank">course notes</a> for lecture 5 
+provide a great visual explanation for how convolution layer transforms an input volume.</p>
+
+<p>Mathematically speaking, given an input image of height \(H\) and width \(W\) and 3 colour planes. Any element of 
+the image can be given as</p>
+
+\[x_{i,j,c} \in \mathbb{R}^{H \times W \times 3}\]
+
+<h3 id="forward-pass">Forward Pass</h3>
+
+<p>Given an input square image (\(H=W\)) \(X\), a filter \(F\) of dimensions \(f \times f\), zero-padding P and 
+stride \(S\), the dimension of the output will be</p>
+
+\[C = \frac{W - f +2P}{S} + 1\]
+
+<p>The output will \(C \times C\) matrix (lets call it \(V\)) and its elements will be given by</p>
+
+\[V_{m,n} = \begin{cases} \label{eqn:convolve}
+\sum_{i=0}^{f-1} \sum_{j=0}^{f-1} w_{i,j}x_{S*m+i-P, S*n + j-P} + b, \text{where } 0 \leq S*m+i-P &lt; W, 0 \leq S*n + j-P &lt; W \\
+0, \text{otherwise}
+\end{cases}\]
+
+<p>where \(b\) is the scalar bias. We will need to calculate a distinct \(V\) for each filter that we apply to our image. This equation is a mouthful and their are a couple of different ways to write it out in Python, I did it as 
+follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">conv_forward_naive</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">conv_param</span><span class="p">):</span>
+<span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">HH</span><span class="p">,</span> <span class="n">WW</span> <span class="o">=</span> <span class="n">w</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">S</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="n">conv_param</span><span class="p">[</span><span class="s">'stride'</span><span class="p">],</span> <span class="n">conv_param</span><span class="p">[</span><span class="s">'pad'</span><span class="p">]</span>
+    <span class="n">output_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="n">HH</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">)</span><span class="o">/</span><span class="n">S</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">output_d</span><span class="p">)</span>
+    <span class="c1"># To make sure that dimensions work out
+</span>    <span class="k">assert</span> <span class="n">output_d</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">output_d</span><span class="p">)</span>
+
+    <span class="n">output_d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">output_d</span><span class="p">)</span>
+
+    <span class="n">output_volume</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">output_d</span><span class="p">,</span> <span class="n">output_d</span><span class="p">)</span>
+
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">output_volume</span><span class="p">)</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">,</span> <span class="n">W</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">))</span>
+
+    <span class="c1"># add padding to x
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">P</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'constant'</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_d</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_d</span><span class="p">):</span>
+                    <span class="c1"># print(X[n, f, S*i: S*i + HH, S*j: S*j + WW] * w[f])
+</span>                    <span class="n">V</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:,</span> <span class="n">S</span><span class="o">*</span><span class="n">i</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">HH</span><span class="p">,</span> <span class="n">S</span><span class="o">*</span><span class="n">j</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="n">j</span> <span class="o">+</span> <span class="n">WW</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">f</span><span class="p">])</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">V</span>
+
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">conv_param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">cache</span>
+</code></pre></div></div>
+
+<h3 id="backward-pass">Backward Pass</h3>
+
+<p>For the backward pass we need to evaluate</p>
+
+\[\frac{\partial L}{\partial V}\frac{\partial V}{\partial b} \nonumber \\
+\frac{\partial L}{\partial V}\frac{\partial V}{\partial w} \nonumber \\
+\frac{\partial L}{\partial V}\frac{\partial V}{\partial x} \nonumber \\\]
+
+<p>It behooves to actually look at a working matrix to see what the results would look like. I will use the matrix
+setup given in <a href="https://cs231n.github.io/convolutional-networks/" target="_blank">course notes</a> for lecture 5.
+A \(5 \times 5\) matrix as input, with padding of 1 and a stride of 2. The output matrix \(V\) would be given as follows</p>
+
+\[\begin{align}
+\left(
+\begin{array}{c|c|c}
+x_{ 0, 0 } w_{ 1,1 }+x_{ 0, 1 } w_{ 1,2 } &amp; x_{ 0, 1 } w_{ 1,0 }+x_{ 0, 2 } w_{ 1,1 } &amp; 
+x_{ 0, 3 } w_{ 1,0 }+x_{ 0, 4 } w_{ 1,1 } \\
++x_{ 1, 0 } w_{ 2,1 }+x_{ 1, 1 } w_{ 2,2 } &amp; +x_{0, 3} w_{1,2}+x_{ 1, 1 } w_{ 2,0 } &amp; 
++x_{ 1, 3 } w_{ 2,0 }+x_{ 1, 4 } w_{ 2,1 } \\
++b &amp; +x_{ 1, 2 } w_{ 2,1 }+x_{ 1, 3 } w_{ 2,2 } &amp; + b \\
+ &amp; +b &amp; ~ \\
+\hline
+x_{ 1, 0 } w_{ 0,1 }+x_{ 1, 1 } w_{ 0,2 } &amp; x_{ 1, 1 } w_{ 0,0 }+x_{ 1, 2 } w_{ 0,1 } &amp; x_{ 1, 3 } w_{ 0,0 }+x_{ 1, 4 } w_{ 0,1 } \\
++x_{ 2, 0 } w_{ 1,1 }+x_{ 2, 1 } w_{ 1,2 } &amp; +x_{ 1, 3 } w_{ 0,2 }+x_{ 2, 1 } w_{ 1,0 } &amp; +x_{ 2, 3 } w_{ 1,0 }+x_{ 2, 4 } w_{ 1,1 } \\
++x_{ 3, 0 } w_{ 2,1 }+x_{ 3, 1 } w_{ 2,2 } &amp; +x_{ 2, 2 } w_{ 1,1 }+x_{ 2, 3 } w_{ 1,2 } &amp; +x_{ 3, 3 } w_{ 2,0 }+x_{ 3, 4 } w_{ 2,1 } \\
++b &amp; +x_{ 3, 1 } w_{ 2,0 }+x_{ 3, 2 } w_{ 2,1 } &amp; +b \\
+ &amp; +x_{ 3, 3 } w_{ 2,2 }+ b &amp; \\
+\hline
+x_{ 3, 0 } w_{ 0,1 }+x_{ 3, 1 } w_{ 0,2 } &amp; x_{ 3, 1 } w_{ 0,0 }+x_{ 3, 2 } w_{ 0,1 } &amp; x_{ 3, 3 } w_{ 0,0 }+x_{ 3, 4 } w_{ 0,1 } \\
++x_{ 4, 0 } w_{ 1,1 }+x_{ 4, 1 } w_{ 1,2 } &amp; +x_{ 3, 3 } w_{ 0,2 }+x_{ 4, 1 } w_{ 1,0 } &amp; +x_{ 4, 3 } w_{ 1,0 }+x_{ 4, 4 } w_{ 1,1 } \\
++b &amp; +x_{ 4, 2 } w_{ 1,1 }+x_{ 4, 3 } w_{ 1,2 }  &amp; +b \\
+&amp; +b &amp;
+\end{array}\right)
+\end{align}\]
+
+<p>Their are way too many terms in this matrix but now we can evaluate the derivatives rather easily. Lets proceed</p>
+
+\[\begin{align}
+\frac{\partial L}{\partial b} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial b} \nonumber \\
+&amp;= 
+\frac{\partial L}{\partial V} \cdot
+\begin{pmatrix}
+1 &amp; 1 &amp; 1 \\
+1 &amp; 1 &amp; 1 \\
+1 &amp; 1 &amp; 1 
+\end{pmatrix} \nonumber \\
+&amp;=\sum_{i=0}^{2} \sum_{j=0}^{2} \left(\frac{\partial L}{\partial V}\right)_{i,j}
+\end{align}\]
+
+<p>Evaluating \(\frac{\partial L}{\partial x}\) is a bit of work but we can deduce some patterns 
+by evaluating a couple elements of the matrix:</p>
+
+\[\begin{align}
+\frac{\partial L}{\partial x_{0,0}} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial x_{0,0} } \nonumber \\
+&amp;= 
+\frac{\partial L}{\partial V} \cdot
+\begin{pmatrix}
+w_{1,1} &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 
+\end{pmatrix} \nonumber \\
+&amp;= \left(\frac{\partial L}{\partial V}\right)_{0,0}w_{1,1}
+\end{align}\]
+
+\[\begin{align}
+\frac{\partial L}{\partial x_{1,0}} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial x_{1,0} } \nonumber \\
+&amp;= 
+\frac{\partial L}{\partial V} \cdot
+\begin{pmatrix}
+0 &amp; 0 &amp; 0 \\
+w_{0,1} &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 
+\end{pmatrix} \nonumber \\
+&amp;= \left(\frac{\partial L}{\partial V}\right)_{0,0}w_{0,1}
+\end{align}\]
+
+\[\begin{align}
+\frac{\partial L}{\partial x_{1,1}} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial x_{1,0} } \nonumber \\
+&amp;= 
+\frac{\partial L}{\partial V} \cdot
+\begin{pmatrix}
+w_{2,2} &amp; w_{2,0} &amp; 0 \\
+w_{0,2} &amp; w_{0,0} &amp; 0 \\
+0 &amp; 0 &amp; 0 
+\end{pmatrix} \nonumber \\
+&amp;= \left(\frac{\partial L}{\partial V}\right)_{0,0}w_{2,2} + \left(\frac{\partial L}{\partial V}\right)_{0,1}w_{2,2}
++\left(\frac{\partial L}{\partial V}\right)_{1,0}w_{0,2} + \left(\frac{\partial L}{\partial V}\right)_{1,1}w_{0,0}
+\end{align}\]
+
+<p>With a bit of reasoning combined with a lot of trial and error, we can deduce that a general 
+solution will look as follows</p>
+
+\[\begin{align}
+\frac{\partial L}{\partial x_{i,j}} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial x_{i,j} } \nonumber \\
+&amp;= \sum_{w1=0}^{2} \sum_{w2=0}^{2}\sum_{k=\text{max}(0, w1*S - P)}^{\text{min}(w1*S + f - P, W)} \sum_{l=\text{max}(0, w2*S - P)}^{\text{min}(w2*S + f - P, W)} \left(\frac{\partial L}{\partial V}\right)_{w1,w2}w_{i+P-w1*S,j+P-w2*S}
+\end{align}\]
+
+<p>To evaluate \(\frac{\partial L}{\partial w}\) I used the same strategy that worked for me 
+previously, I calculated a couple of elements of the matrix and found some patterns to determine the general solution.</p>
+
+\[\begin{align}
+\frac{\partial L}{\partial w_{0,0}} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial w_{0,0} } \nonumber \\
+&amp;= 
+\frac{\partial L}{\partial V} \cdot
+\begin{pmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; x_{1,1} &amp; x_{1,3} \\
+0 &amp; x_{3,1} &amp; x_{3,3} 
+\end{pmatrix} \nonumber \\
+&amp;= \left(\frac{\partial L}{\partial V}\right)_{1,1}x_{1,1} + 
+\left(\frac{\partial L}{\partial V}\right)_{1,2}x_{1,3} + 
+\left(\frac{\partial L}{\partial V}\right)_{2,1}x_{3,1} + 
+\left(\frac{\partial L}{\partial V}\right)_{2,2}x_{3,3}
+\end{align}\]
+
+\[\begin{align}
+\frac{\partial L}{\partial w_{1,0}} &amp;= \frac{\partial L}{\partial V}\frac{\partial V}{\partial w_{1,0} } \nonumber \\
+&amp;= 
+\frac{\partial L}{\partial V} \cdot
+\begin{pmatrix}
+0 &amp; x_{1,0} &amp; 0 \\
+x_{2,1} &amp; x_{1,1} &amp; x_{2,3} \\
+0 &amp; x_{4,1} &amp; x_{4,3} 
+\end{pmatrix} \nonumber \\
+=&amp; \left(\frac{\partial L}{\partial V}\right)_{0,1}x_{1,0} + 
+\left(\frac{\partial L}{\partial V}\right)_{1,0}x_{2,1} + 
+\left(\frac{\partial L}{\partial V}\right)_{1,1}x_{1,1} + 
+\left(\frac{\partial L}{\partial V}\right)_{1,2}x_{2,3} \\
+&amp;+
+\left(\frac{\partial L}{\partial V}\right)_{2,1}x_{4,1} +
+\left(\frac{\partial L}{\partial V}\right)_{2,2}x_{4,3}
+\end{align}\]
+
+<p>The general solution is</p>
+
+\[\begin{align}
+\frac{\partial L}{\partial w_{i,j}} = \begin{cases}
+\sum_{w1=0}^{2} \sum_{w2=0}^{2} w_{w1, w2} x_{S*w1 + i, S*w2 + j}, 
+\text{ where }0 \leq S*w1 + i &lt; W, 0 \leq S*w2 + j &lt; W \\
+0, \text{ otherwise}
+\end{cases}
+\end{align}\]
+
+<p>Their must be a way to simpify these equations and write them in a more efficient manner but that 
+is outside the scope of this assignment. Here is the naive Python implementation of the results derived 
+in this section:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">conv_backward_naive</span><span class="p">(</span><span class="n">dout</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">conv_param</span> <span class="o">=</span> <span class="n">cache</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">HH</span><span class="p">,</span> <span class="n">WW</span>  <span class="o">=</span> <span class="n">w</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">S</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="n">conv_param</span><span class="p">[</span><span class="s">'stride'</span><span class="p">],</span> <span class="n">conv_param</span><span class="p">[</span><span class="s">'pad'</span><span class="p">]</span>
+    <span class="n">output_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="n">HH</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">P</span><span class="p">)</span> <span class="o">/</span> <span class="n">S</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="c1"># To make sure that dimensions work out
+</span>    <span class="k">if</span> <span class="n">output_d</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">output_d</span><span class="p">):</span>
+        <span class="n">output_d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">output_d</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">W</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># add padding to x
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'constant'</span><span class="p">)</span>
+
+    <span class="c1"># Number of b is equivalent to the number of filters
+</span>    <span class="n">db</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">db</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dout</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="p">:</span> <span class="p">,:])</span>
+
+    <span class="n">dw</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">HH</span><span class="p">,</span> <span class="n">WW</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">WW</span><span class="p">):</span>
+                <span class="n">matrix_elements_i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[[</span><span class="n">S</span><span class="o">*</span><span class="n">i_</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">output_d</span> <span class="k">for</span> <span class="n">i_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_d</span><span class="p">)]</span> <span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">HH</span><span class="p">):</span>
+                    <span class="n">matrix_elements_j</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[[</span><span class="n">S</span><span class="o">*</span><span class="n">i_</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">output_d</span> <span class="k">for</span> <span class="n">i_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_d</span><span class="p">)]</span> <span class="p">).</span><span class="n">T</span>
+                    <span class="n">dw</span><span class="p">[</span><span class="n">f</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dout</span><span class="p">[:,</span> <span class="n">f</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">c</span><span class="p">,</span> <span class="n">matrix_elements_i</span><span class="p">,</span> <span class="n">matrix_elements_j</span><span class="p">])</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">w1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_d</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">w2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_d</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">w1</span><span class="o">*</span><span class="n">S</span> <span class="o">-</span> <span class="n">P</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">w1</span><span class="o">*</span><span class="n">S</span> <span class="o">+</span> <span class="n">WW</span> <span class="o">-</span> <span class="n">P</span><span class="p">)</span> <span class="p">):</span>
+                            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">w2</span><span class="o">*</span><span class="n">S</span> <span class="o">-</span> <span class="n">P</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">w2</span><span class="o">*</span><span class="n">S</span> <span class="o">+</span> <span class="n">HH</span> <span class="o">-</span> <span class="n">P</span><span class="p">)</span> <span class="p">):</span>
+                                <span class="n">dx</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">+=</span><span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dout</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">f</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">P</span> <span class="o">-</span> <span class="n">w1</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">P</span> <span class="o">-</span> <span class="n">w2</span><span class="o">*</span><span class="n">S</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dw</span><span class="p">,</span> <span class="n">db</span>
+</code></pre></div></div>
+
+<h2 id="max-pooling">Max Pooling</h2>
+
+<p>Pooling is conceptually very simple. In forward pooling we run our filter over the image and 
+select the max value in the window only. Forward max pooling with a \(2 \times 2\) filter and 
+a stride of 2 would look as follows:</p>
+
+<p><img src="/urmlblog/images/maxPooling/Forward Max Pooling.jpg" alt="_config.yml" />
+<em>Forward max pooling with a \(2 \times 2\) filter and a stride of 2</em></p>
+
+<p>While the backward pass over this pooling will be</p>
+
+<p><img src="/urmlblog/images/maxPooling/Backward Max Pooling.jpg" alt="_config.yml" />
+<em>Backward pass over max pooling with a \(2 \times 2\) filter and a stride of 2</em></p>
+
+<p>If you are interested in more details check out 
+<a href="https://lanstonchu.wordpress.com/2018/09/01/convolutional-neural-network-cnn-backward-propagation-of-the-pooling-layers/" target="_blank">this blog post</a> 
+by Lanston Chu.</p>
+
+<p>Now for the code</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">max_pool_forward_naive</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pool_param</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">pool_height</span><span class="p">,</span> <span class="n">pool_width</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">pool_param</span><span class="p">[</span><span class="s">'pool_height'</span><span class="p">],</span> <span class="n">pool_param</span><span class="p">[</span><span class="s">'pool_width'</span><span class="p">],</span> <span class="n">pool_param</span><span class="p">[</span><span class="s">'stride'</span><span class="p">]</span>
+
+    <span class="n">H_pool</span> <span class="o">=</span> <span class="p">(</span><span class="n">H</span> <span class="o">-</span> <span class="n">pool_height</span><span class="p">)</span><span class="o">//</span><span class="n">S</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">W_pool</span> <span class="o">=</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="n">pool_width</span><span class="p">)</span><span class="o">//</span><span class="n">S</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H_pool</span><span class="p">,</span> <span class="n">W_pool</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">H_pool</span><span class="p">):</span>
+                <span class="n">pool_i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="n">i_</span><span class="p">]</span><span class="o">*</span><span class="n">pool_height</span> <span class="k">for</span> <span class="n">i_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="n">i</span><span class="o">*</span><span class="n">S</span> <span class="o">+</span> <span class="n">pool_height</span><span class="p">)])</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">W_pool</span><span class="p">):</span>
+                    <span class="n">pool_j</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="n">j_</span><span class="p">]</span><span class="o">*</span><span class="n">pool_width</span> <span class="k">for</span> <span class="n">j_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="n">j</span><span class="o">*</span><span class="n">S</span> <span class="o">+</span> <span class="n">pool_width</span><span class="p">)]).</span><span class="n">T</span>
+                    <span class="n">out</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">c</span><span class="p">,</span> <span class="n">pool_i</span><span class="p">,</span> <span class="n">pool_j</span><span class="p">])</span>
+
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pool_param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">cache</span>
+
+<span class="k">def</span> <span class="nf">max_pool_backward_naive</span><span class="p">(</span><span class="n">dout</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">pool_param</span> <span class="o">=</span> <span class="n">cache</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">pool_height</span><span class="p">,</span> <span class="n">pool_width</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">pool_param</span><span class="p">[</span><span class="s">'pool_height'</span><span class="p">],</span> <span class="n">pool_param</span><span class="p">[</span><span class="s">'pool_width'</span><span class="p">],</span> <span class="n">pool_param</span><span class="p">[</span><span class="s">'stride'</span><span class="p">]</span>
+
+    <span class="n">H_pool</span> <span class="o">=</span> <span class="p">(</span><span class="n">H</span> <span class="o">-</span> <span class="n">pool_height</span><span class="p">)</span> <span class="o">//</span> <span class="n">S</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">W_pool</span> <span class="o">=</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="n">pool_width</span><span class="p">)</span> <span class="o">//</span> <span class="n">S</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">H_pool</span><span class="p">):</span>
+                <span class="n">pool_i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="n">i_</span><span class="p">]</span> <span class="o">*</span> <span class="n">pool_height</span> <span class="k">for</span> <span class="n">i_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">S</span> <span class="o">+</span> <span class="n">pool_height</span><span class="p">)])</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">W_pool</span><span class="p">):</span>
+                    <span class="n">pool_j</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="n">j_</span><span class="p">]</span> <span class="o">*</span> <span class="n">pool_width</span> <span class="k">for</span> <span class="n">j_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">j</span> <span class="o">*</span> <span class="n">S</span> <span class="o">+</span> <span class="n">pool_width</span><span class="p">)]).</span><span class="n">T</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">amax</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">c</span><span class="p">,</span> <span class="n">pool_i</span><span class="p">,</span> <span class="n">pool_j</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">S</span> <span class="o">+</span> <span class="n">pool_height</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">j</span> <span class="o">*</span> <span class="n">S</span> <span class="o">+</span> <span class="n">pool_width</span><span class="p">):</span>
+                            <span class="n">dx</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dout</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">max_val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dx</span>
+</code></pre></div></div>
+
+<h2 id="spatial-and-group-batch-normalization">Spatial and Group Batch Normalization</h2>
+
+<p>Spatial and Group Batch Normalization are very similar to Group Normalization and Layer Normalization
+covered in the 
+<a href="https://usmanr149.github.io/urmlblog/cs231n%20assignments/2020/04/03/Batchnorm.html" target="_blank">previous assignment</a>. Only now we are dealing with 3-dimensional matrices instead of 2.</p>
+
+<p>Check out the full assignment <a href="https://github.com/usmanr149/CS231n/blob/master/assignment2/ConvolutionalNetworks.ipynb" target="_blank">here</a></p>
+
+    
+
+
+
+<div class="post-tags">
+  
+    
+    <a href="/urmlblog/tags.html#cs231n">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">CS231n</span>
+    </a>
+  
+    
+    <a href="/urmlblog/tags.html#cnn">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">CNN</span>
+    </a>
+  
+    
+    <a href="/urmlblog/tags.html#batch-normalization">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">Batch Normalization</span>
+    </a>
+  
+    
+    <a href="/urmlblog/tags.html#layer-normalization">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">Layer Normalization</span>
+    </a>
+  
+</div>
+  </div>
+
+  
+  <section class="comments">
+    <h2>Comments</h2>
+    
+  <div id="disqus_thread">
+    <button class="disqus-load" onClick="loadDisqusComments()">
+      Load Comments
+    </button>
+  </div>
+  <script>
+
+  /**
+  *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW
+  *  TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+  *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT:s
+  *  https://disqus.com/admin/universalcode/#configuration-variables
+  */
+  var disqus_config = function () {
+    this.page.url = "http://localhost:4000/urmlblog/cs231n%20assignments/2020/04/07/CNN.html";
+    this.page.identifier = "" ||
+                           "http://localhost:4000/urmlblog/cs231n%20assignments/2020/04/07/CNN.html";
+  }
+  function loadDisqusComments() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//https-usmanr149-github-io-urmlblog.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  </script>
+  <noscript>
+    Please enable JavaScript to view the
+    <a href="https://disqus.com/?ref_noscript">comments powered by Disqus</a>.
+  </noscript>
+
+
+
+  </section>
+
+  <section class="related">
+  <h2>Related Posts</h2>
+  <ul class="posts-list">
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/time%20series/2021/04/30/2021-4-30-AR-model.html">
+            Autoregressive Model -- Properties of AR(1) Model
+            <small>30 Apr 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/stocks/2020/10/01/stock-movement-prediction.html">
+            Training a Machine Learning Algorithm to Predict Stock Price Movement
+            <small>01 Oct 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/cnn/2020/05/24/Unet-Architectecture-TF.html">
+            U-NET Convolution Neural Network for Semantic Segmentation
+            <small>24 May 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</section>
+
+</div>
+
+    </main>
+
+    <!-- Optional footer content -->
+
+  </body>
+</html>
