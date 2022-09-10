@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="https://gmpg.org/xfn/11" rel="profile" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+  <title>
+    
+      Generating Anchor Boxes &middot; UR Machine Learning Blog
+    
+  </title>
+
+  
+
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/urmlblog/assets/css/main.css" />
+  
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface" />
+
+  <!-- Icons -->
+<!--  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/urmlblog/favicon.png" />
+<link rel="shortcut icon" href="/urmlblog/favicon.ico" />-->
+
+  <!-- RSS -->
+<!--  <link rel="alternate" type="application/rss+xml" title="RSS" href="/urmlblog/feed.xml" />-->
+
+  <!-- Additional head bits without overriding original head -->
+</head>
+
+
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: { equationNumbers: { autoNumber: "all" } }
+  });
+  MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+<!--  MathJax.Hub.Config({-->
+<!--    jax: ["input/TeX","output/HTML-CSS"],-->
+<!--    displayAlign: "left"-->
+<!--  });-->
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/urmlblog/favicon.png" />
+<link rel="shortcut icon" href="/urmlblog/favicon.ico" />
+
+  <body class="post">
+
+    <div id="sidebar">
+  <header>
+    <div class="site-title">
+      <a href="/urmlblog/">
+        
+          <span class="back-arrow icon"><svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+</svg></span>
+        
+        UR Machine Learning Blog
+      </a>
+    </div>
+    <p class="lead">Data Scientist at City of Edmonton</p>
+  </header>
+  <nav id="sidebar-nav-links">
+  
+    <a class="home-link "
+        href="/urmlblog/">Home</a>
+  
+  
+
+  
+
+  
+
+
+  
+    
+  
+
+  
+    
+      <a class="page-link "
+          href="/urmlblog/about.html">About</a>
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+
+  
+
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+      <a class="category-link "
+          href="/urmlblog/category/categories.html">Categories</a>
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+
+  <!-- Optional additional links to insert in sidebar nav -->
+</nav>
+
+
+  
+
+  <nav id="sidebar-icon-links">
+  
+
+<!--  <a id="subscribe-link"-->
+<!--     class="icon" title="Subscribe" aria-label="Subscribe"-->
+<!--     href="/urmlblog/feed.xml">-->
+<!--    <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <circle cx="6.18" cy="17.82" r="2.18"/>
+    <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+</svg>-->
+<!--  </a>-->
+
+  
+  
+  
+  
+
+  <a id="linkedin-link"
+       title="Linkedin" aria-label="linkedin" class="icon" target="_blank"
+       href="https://www.linkedin.com/in/usman-rizwan-data-magic/">
+      <?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24pt" height="24pt" viewBox="0 0 24 24" version="1.1">
+<defs>
+<filter id="alpha" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+  <feColorMatrix type="matrix" in="SourceGraphic" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+</filter>
+<mask id="mask0">
+  <g filter="url(#alpha)">
+<rect x="0" y="0" width="24" height="24" style="fill:rgb(0%,0%,0%);fill-opacity:0.780392;stroke:none;"/>
+  </g>
+</mask>
+<linearGradient id="linear0" gradientUnits="userSpaceOnUse" x1="-808.8727" y1="199.8918" x2="-860.5692" y2="49.2029" gradientTransform="matrix(-0.0554531,0,0,-0.0554531,-38.267222,8.831372)">
+<stop offset="0" style="stop-color:rgb(100%,100%,100%);stop-opacity:1;"/>
+<stop offset="1" style="stop-color:rgb(100%,100%,100%);stop-opacity:0;"/>
+</linearGradient>
+<clipPath id="clip1">
+  <rect width="24" height="24"/>
+</clipPath>
+<g id="surface6" clip-path="url(#clip1)">
+<path style=" stroke:none;fill-rule:nonzero;fill:url(#linear0);" d="M 17.195312 1.925781 L 6.804688 1.925781 C 4.054688 1.925781 1.839844 4.160156 1.839844 6.929688 L 1.839844 17.070312 C 1.929688 19.234375 2.273438 17.863281 2.921875 15.46875 C 3.679688 12.683594 6.148438 10.246094 9.152344 8.421875 C 11.445312 7.03125 14.011719 6.140625 18.683594 6.054688 C 21.335938 6.007812 21.101562 2.617188 17.195312 1.925781 Z M 17.195312 1.925781 "/>
+</g>
+</defs>
+<g id="surface1">
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(11.372549%,54.901961%,70.980392%);fill-opacity:1;" d="M 19.6875 0.984375 L 4.3125 0.984375 C 2.472656 0.984375 0.984375 2.472656 0.984375 4.3125 L 0.984375 19.6875 C 0.984375 21.527344 2.472656 23.015625 4.3125 23.015625 L 19.6875 23.015625 C 21.527344 23.015625 23.015625 21.527344 23.015625 19.6875 L 23.015625 4.3125 C 23.015625 2.472656 21.527344 0.984375 19.6875 0.984375 Z M 19.6875 0.984375 "/>
+<use xlink:href="#surface6" mask="url(#mask0)"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 7.648438 19.476562 L 7.648438 9.515625 L 4.339844 9.515625 L 4.339844 19.476562 Z M 5.996094 8.15625 C 7.148438 8.15625 7.867188 7.390625 7.867188 6.433594 C 7.847656 5.457031 7.148438 4.710938 6.015625 4.710938 C 4.882812 4.710938 4.144531 5.457031 4.144531 6.433594 C 4.144531 7.390625 4.863281 8.15625 5.972656 8.15625 Z M 5.996094 8.15625 "/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 9.484375 19.476562 L 12.792969 19.476562 L 12.792969 13.914062 C 12.792969 13.617188 12.816406 13.320312 12.902344 13.105469 C 13.144531 12.511719 13.6875 11.894531 14.601562 11.894531 C 15.800781 11.894531 16.28125 12.808594 16.28125 14.148438 L 16.28125 19.476562 L 19.589844 19.476562 L 19.589844 13.765625 C 19.589844 10.703125 17.957031 9.28125 15.777344 9.28125 C 13.992188 9.28125 13.207031 10.277344 12.773438 10.960938 L 12.792969 10.960938 L 12.792969 9.515625 L 9.484375 9.515625 C 9.527344 10.449219 9.484375 19.476562 9.484375 19.476562 Z M 9.484375 19.476562 "/>
+</g>
+</svg>
+
+    </a>
+
+    <a id="github-link"
+       title="Github" aria-label="github" class="icon" target="_blank"
+       href="https://github.com/usmanr149/">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28" height="24" width="28"><path d="M12 2c6.625 0 12 5.375 12 12 0 5.297-3.437 9.797-8.203 11.391-0.609 0.109-0.828-0.266-0.828-0.578 0-0.391 0.016-1.687 0.016-3.297 0-1.125-0.375-1.844-0.812-2.219 2.672-0.297 5.484-1.313 5.484-5.922 0-1.313-0.469-2.375-1.234-3.219 0.125-0.313 0.531-1.531-0.125-3.187-1-0.313-3.297 1.234-3.297 1.234-0.953-0.266-1.984-0.406-3-0.406s-2.047 0.141-3 0.406c0 0-2.297-1.547-3.297-1.234-0.656 1.656-0.25 2.875-0.125 3.187-0.766 0.844-1.234 1.906-1.234 3.219 0 4.594 2.797 5.625 5.469 5.922-0.344 0.313-0.656 0.844-0.766 1.609-0.688 0.313-2.438 0.844-3.484-1-0.656-1.141-1.844-1.234-1.844-1.234-1.172-0.016-0.078 0.734-0.078 0.734 0.781 0.359 1.328 1.75 1.328 1.75 0.703 2.141 4.047 1.422 4.047 1.422 0 1 0.016 1.937 0.016 2.234 0 0.313-0.219 0.688-0.828 0.578-4.766-1.594-8.203-6.094-8.203-11.391 0-6.625 5.375-12 12-12zM4.547 19.234c0.031-0.063-0.016-0.141-0.109-0.187-0.094-0.031-0.172-0.016-0.203 0.031-0.031 0.063 0.016 0.141 0.109 0.187 0.078 0.047 0.172 0.031 0.203-0.031zM5.031 19.766c0.063-0.047 0.047-0.156-0.031-0.25-0.078-0.078-0.187-0.109-0.25-0.047-0.063 0.047-0.047 0.156 0.031 0.25 0.078 0.078 0.187 0.109 0.25 0.047zM5.5 20.469c0.078-0.063 0.078-0.187 0-0.297-0.063-0.109-0.187-0.156-0.266-0.094-0.078 0.047-0.078 0.172 0 0.281s0.203 0.156 0.266 0.109zM6.156 21.125c0.063-0.063 0.031-0.203-0.063-0.297-0.109-0.109-0.25-0.125-0.313-0.047-0.078 0.063-0.047 0.203 0.063 0.297 0.109 0.109 0.25 0.125 0.313 0.047zM7.047 21.516c0.031-0.094-0.063-0.203-0.203-0.25-0.125-0.031-0.266 0.016-0.297 0.109s0.063 0.203 0.203 0.234c0.125 0.047 0.266 0 0.297-0.094zM8.031 21.594c0-0.109-0.125-0.187-0.266-0.172-0.141 0-0.25 0.078-0.25 0.172 0 0.109 0.109 0.187 0.266 0.172 0.141 0 0.25-0.078 0.25-0.172zM8.937 21.438c-0.016-0.094-0.141-0.156-0.281-0.141-0.141 0.031-0.234 0.125-0.219 0.234 0.016 0.094 0.141 0.156 0.281 0.125s0.234-0.125 0.219-0.219z"></path>
+</svg>
+
+    </a>
+
+  
+    <a id="tags-link"
+       class="icon"
+       title="Tags" aria-label="Tags"
+       href="/urmlblog/tags.html">
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+    </a>
+  
+
+  
+    <a id="search-link"
+       class="icon"
+       title="Search" aria-label="Search"
+       href="/urmlblog/search.html">
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</svg>
+    </a>
+  
+
+  <!-- Optional additional links to insert for icons links -->
+</nav>
+
+  <!--<p>-->
+<!--  &copy; 2022.-->
+<!--  <a href="/urmlblog/LICENSE.md">MIT License.</a>-->
+<!--</p>-->
+
+</div>
+
+    <main class="container">
+      <header>
+  <h1 class="post-title">Generating Anchor Boxes</h1>
+</header>
+<div class="content">
+  <div class="post-meta">
+  <span class="post-date">09 Sep 2022</span>
+  <span class="post-categories">
+    
+      &bull;
+
+      
+      
+      
+
+      
+        Computer Vision
+      
+    
+  </span>
+</div>
+
+
+  <div class="post-body">
+    <h1 id="anchor-boxes">Anchor Boxes</h1>
+
+<p>Anchor boxes are predifined collection of boxes into which the ground truth labels will be mapped. The anchor boxes encompass a variety widths, heights and aspect ratios to match the possible ground truth label for objects in a dataset. For the VGG16-Single Shot Detector architecture 8732 anchor boxes are generated, Figure 1 shows just the 2% of all the anchor boxes generated for the VVG16-Single Shot Detector.</p>
+
+<p><img src="/urmlblog/images/SSD/SSD_VGG16_AnchorBoxes.png" alt="_config.yml" /></p>
+
+<h1 id="advantages-of-anchor-boxes">Advantages of Anchor Boxes</h1>
+
+<p>The advantage of anchor boxes is that you can evaluate all object predictions at once. Anchor boxes eliminate the need for scanning an image or making multiple passes throungh the model for each area of interest.</p>
+
+<h1 id="how-to-create-anchor-boxes">How to Create Anchor Boxes?</h1>
+
+<p>The shape and number of anchor boxes generated depends on the underlying Convolution Neural Network architecture used for mapping, the number of features selected and the number of aspect ratio per feature. Here we will will take a look at VGG16 network and discuss how it’s architecture is used to determine the number and sizes of the the anchorbox. Figure 2 shows what the VGG16 architecture for classification looks like:</p>
+
+<p><img src="/urmlblog/images/SSD/VGG16-architecture.jpeg" alt="_config.yml" />
+<em>From <a href="https://www.learndatasci.com/tutorials/hands-on-transfer-learning-keras/" target="_blank">Hands-on Transfer Learning with Keras and the VGG16 Model</a> by James McDermott. The VGG16 model architecture for a classification process.</em></p>
+
+<p>In SSD archtecture, we remove the ending fully connected layers:</p>
+
+<p><img src="/urmlblog/images/SSD/VGG16-architecture-remove-fcnn.jpg" alt="_config.yml" />
+<em>From <a href="https://www.learndatasci.com/tutorials/hands-on-transfer-learning-keras/" target="_blank">Hands-on Transfer Learning with Keras and the VGG16 Model</a> by James McDermott. The last last layer are removed from VGG16 when it is tranformed to an SSD.</em></p>
+
+<p>and use the output of the conv4_3 layer as a feature map.</p>
+
+<p><img src="/urmlblog/images/SSD/SSD Architecture -- 1.png" alt="_config.yml" />
+<em>Use the output from the conv4_3 layer as a feature map on which to base detections.</em></p>
+
+<p>But thats not all, in SSD we want to make detections at various scales, we want to detect large objects small objects and everything in-between. So we add layers to generate a stack of feature maps with a variety of sizes. These feature maps will be used to make detections.</p>
+
+<p><img src="/urmlblog/images/SSD/SSD Architecture -- 2.png" alt="_config.yml" />
+<em>Feature maps generated from the base VGG16 model.</em></p>
+
+<p>The SSD paper explains that these feature maps will have different receptive field sizes, the anchor boxes we will generate don’t need to exactly corresond to the actual receptive fields. The paper presents a method to generate anchor “boxes so that specific feature maps learn to be responsive to particular scales of the objects.”</p>
+
+<p>Generating these anchorboxes is relatively straightforward. The SSD paper presents a simple way to genrate the anchorboxes using the following equation:</p>
+
+\[s_{k} = s_{\text{min}} + \dfrac{(s_{\text{max}} - s_{\text{min}})}{m - 1} (k - 1),~~~~~~ k \in [0, m)\]
+
+<p>where $s_{\text{min}}$ = 0.2, $s_{\text{max}}$ = 0.9, $k$ is the feature map number and $m$ is the total number of feature maps, for VGG16 it is 6 (see Figure 3).</p>
+
+<p>For now lets ignore the aspect ratios, in that case the width and height of the anchor box is $s_{k}$, the center of the anchor box is given by</p>
+
+\[\left(\dfrac{i + 0.5}{f_k}, \dfrac{j + 0.5}{f_k} \right)\]
+
+<p>where $i,j \in [0, f_k)$</p>
+
+<p>For VGG16, $f_k = (38, 19, 10, 5, 3, 1)$</p>
+
+<p>We can generate the anchor boxes using the following code snippet:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">anchor_boxes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">f_0</span> <span class="o">=</span> <span class="mi">38</span>
+
+<span class="n">s_min</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">s_max</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mi">6</span>
+
+<span class="n">s_1</span> <span class="o">=</span> <span class="n">s_min</span> <span class="o">+</span> <span class="p">(</span><span class="n">s_max</span> <span class="o">-</span> <span class="n">s_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">f_1</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">f_1</span><span class="p">):</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">f_k</span><span class="p">)</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">f_k</span><span class="p">)</span>
+        <span class="n">anchor_boxes</span><span class="p">.</span><span class="n">append</span><span class="p">([</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">s_1</span><span class="p">,</span> <span class="n">s_1</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>On a 300x300 image, this what the anchor boxes look like:</p>
+
+<p><img src="/urmlblog/images/SSD/conv4_3_anchor_boxes.png" alt="_config.yml" />
+<em>Anchor boxes that correspond to conv4_3 feature map from VGG16.</em></p>
+
+<p>This is not all though, as we can also add more anchor boxes by varying the aspect ratios. The SSD paper recommends using 5 aspect ratios denoted as $a_{r} \in {1,2,3,1/2,1/3}$. The width and height for each aspect ratio is altered by the following equations:</p>
+
+\[w_{k}^{a} = s_{k}\sqrt(a_{r}) \\
+h_{k}^{a} = s_{k}/\sqrt(a_{r})\]
+
+<p>For the aspect ratio of 1, an additional default box whose scale is $s_{k’} = \sqrt{s_{k}s_{k+1}}$ is also added. This means that 6 default anchor boxes are generated per feature map location, so for $f_0$, we will get $38 \times 38 \times 6$ anchor boxes.</p>
+
+
+    
+
+
+
+<div class="post-tags">
+  
+    
+    <a href="/urmlblog/tags.html#anchor-boxes">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">Anchor Boxes</span>
+    </a>
+  
+    
+    <a href="/urmlblog/tags.html#computer-vision">
+    
+      <span class="icon">
+        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h24v24H0z" fill="none"/>
+    <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+</svg>
+      </span>&nbsp;<span class="tag-name">Computer Vision</span>
+    </a>
+  
+</div>
+  </div>
+
+  
+  <section class="comments">
+    <h2>Comments</h2>
+    
+  <div id="disqus_thread">
+    <button class="disqus-load" onClick="loadDisqusComments()">
+      Load Comments
+    </button>
+  </div>
+  <script>
+
+  /**
+  *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW
+  *  TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+  *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT:s
+  *  https://disqus.com/admin/universalcode/#configuration-variables
+  */
+  var disqus_config = function () {
+    this.page.url = "http://localhost:4000/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html";
+    this.page.identifier = "" ||
+                           "http://localhost:4000/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html";
+  }
+  function loadDisqusComments() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//https-usmanr149-github-io-urmlblog.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  </script>
+  <noscript>
+    Please enable JavaScript to view the
+    <a href="https://disqus.com/?ref_noscript">comments powered by Disqus</a>.
+  </noscript>
+
+
+
+  </section>
+
+  <section class="related">
+  <h2>Related Posts</h2>
+  <ul class="posts-list">
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/time%20series/2021/04/30/2021-4-30-AR-model.html">
+            Autoregressive Model -- Properties of AR(1) Model
+            <small>30 Apr 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/stocks/2020/10/01/stock-movement-prediction.html">
+            Training a Machine Learning Algorithm to Predict Stock Price Movement
+            <small>01 Oct 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/urmlblog/cnn/2020/05/24/Unet-Architectecture-TF.html">
+            U-NET Convolution Neural Network for Semantic Segmentation
+            <small>24 May 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</section>
+
+</div>
+
+    </main>
+
+    <!-- Optional footer content -->
+
+  </body>
+</html>
