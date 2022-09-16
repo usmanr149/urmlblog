@@ -357,6 +357,10 @@ $c$ is the predicted class.</p>
 
 <p>The prior variances or the scaling constants are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easy to optimize.</p>
 
+<h2 id="implementing-ssd-in-tensorflow-20">Implementing SSD in Tensorflow 2.0</h2>
+
+<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a previous post so I will not go over them here. We</p>
+
 
     
 
