@@ -121,15 +121,15 @@ MathJax.Hub.Config({
   
 
   
-
-  
-
-  
     
   
 
   
     
+  
+
+  
+
   
 
 
@@ -170,15 +170,15 @@ MathJax.Hub.Config({
   
 
   
-
-  
-
-  
     
   
 
   
     
+  
+
+  
+
   
 
 
@@ -307,25 +307,31 @@ MathJax.Hub.Config({
 
 
   <div class="post-body">
-    <p>Single Shot MultiBox Detector (SSD) detects objects in images using a single deep neural network. In this blog post I will cover how to implement SSD300 (meaning images are 300x300) detector presented <a href="https://arxiv.org/pdf/1512.02325.pdf" target="_blank">here</a> in Tensorflow 2.0.</p>
+    <p>Single Shot MultiBox Detector (SSD) detects objects in images using a single deep neural network. In this blog post I will cover how to implement SSD300 (meaning images are scaled to 300x300 before being fed to the model) detector presented <a href="https://arxiv.org/pdf/1512.02325.pdf" target="_blank">here</a> in Tensorflow 2.0.</p>
 
 <h1 id="what-do-we-need">What do we Need?</h1>
 
-<p>SSD needs an input image with ground truth boxes for each objects. In addition we also need default boxes (also called anchor boxes), for each default box we predict the offset and the confidence score for all object categories.</p>
+<p>To train an SSD model, we need an input image with ground truth boxes for each objects. The figure below shows an example of an image with a ground truth label for aeroplane:</p>
 
-<p>At training time, the default boxes are matched to the ground truth boxes. The matched boxes are treated as positives and the rest of the default boxes are treated as negative. The model loss is a weighted sum between localization loss and confidence loss.</p>
+<p><img src="/urmlblog/images/SSD/image_w_bbox.png" alt="_config.yml" /></p>
+
+<p>In addition we also need default boxes (also called anchor boxes). At training time, the default boxes are matched to the ground truth boxes. The image below shows all of the default boxes that overlap with the ground truth box.</p>
+
+<p><img src="/urmlblog/images/SSD/default_boxes_w_IOU_g_0.5.png" alt="_config.yml" /></p>
+
+<p>The matched boxes are treated as positives and the rest of the default boxes are treated as negative.</p>
 
 <h2 id="model-configuration">Model Configuration</h2>
 
-<p>The SSD approach produces a fixed-size collection of default boxes. The model then predict the offset and classification scores for in the default boxes. The early network laters are based on standard architecture used for image classification (VVG16, CGG16, MobileNetV1, MobileNetV2, etc.). Auxilary structure is added to the base model to product the offset and classification scores for the default boxes.  In this blog I will be going over how to use VGG16 as the base model layer and building a SSD model off off it.</p>
+<p>The SSD approach produces a fixed-size collection of default boxes. The model then predict the offset and classification scores for each of the default boxes. The early network layers are based on standard architecture used for image classification (<a href="https://keras.io/api/applications/vgg/" target="_blank">VGG16</a>, <a href="https://keras.io/api/applications/vgg/" target="_blank">VGG19</a>, <a href="https://keras.io/api/applications/mobilenet/" target="_blank">MobileNetV1</a>, <a href="https://keras.io/api/applications/mobilenet/" target="_blank">MobileNetV2</a>, etc.). Auxilary structure is added to the base model to produce the offset and classification scores for the default boxes.  In this blog I will be going over how to use VGG16 as the base model layer and build a SSD model off off it.</p>
 
 <p><img src="/urmlblog/images/SSD/VGG-16-SSD.png" alt="_config.yml" /></p>
 
-<p>SSD uses multi-scale feature maps for detections at multiple scales. We generate default boxes that is associated with each feature map cell. For example in the image below the CNN, we can see how the CNN output maps to the default boxes.</p>
+<p>SSD uses multi-scale feature maps for detections at multiple scales. We generate default boxes that are associated with each feature map cell. For example in the image below, we can see how the CNN output maps to the default boxes for an image.</p>
 
 <p><img src="/urmlblog/images/SSD/Default_Boxes_and_CNN_outputs.png" alt="_config.yml" /></p>
 
-<p>For each default box we generate $(4 + c + 1)$ outputs, where $c$ is the number of classes in the dataset and +1 for background.</p>
+<p>For each default box we generate $(4 + c + 1)$ outputs, where 4 because of the offsets, $c$ is the number of classes in the dataset and +1 for background.</p>
 
 <h2 id="matching-default-boxes-to-ground-truth-boxes">Matching Default Boxes to Ground Truth Boxes</h2>
 
@@ -353,13 +359,186 @@ $c$ is the predicted class.</p>
 \[\hat{g}_j^{cx} = 5 * \dfrac{g_j^{cx} - d_i^{cx}}{d_i^w} \\
 \hat{g}_j^{cy} = 5 * \dfrac{g_j^{cy} - d_i^{cy}}{d_i^h} \\
 \hat{g}_j^{w} = 10 * \text{log}\left(\dfrac{g_j^w}{d_i^w}\right) \\
-\hat{g}_j^{h} = 10 * \text{log}\left(\dfrac{g_j^h}{d_i^h}\right)\]
+\hat{g}_j^{h} = 10 * \text{log}\left(\dfrac{g_j^h}{d_i^h}\right) \label{eq:offsets}\]
 
 <p>The prior variances or the scaling constants are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easy to optimize.</p>
 
 <h2 id="implementing-ssd-in-tensorflow-20">Implementing SSD in Tensorflow 2.0</h2>
 
-<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a previous post so I will not go over them here. We</p>
+<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a previous post so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid represtation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the the corners representation: $[xmin, ymin, xmax, ymax]$.</p>
+
+<p><img src="/urmlblog/images/SSD/Centroid Representation.jpg" alt="_config.yml" /></p>
+
+<p>The code below contains helper functions to generate default bounding boxes, find default boxes for which IOU &gt; threshold with ground truth boxes, calculate offsets for training objectives as shown in Eq. \ref{eq:offsets}</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">calculate_scale_of_default_boxes</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s_max</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">s_min</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">):</span>
+    <span class="s">"""
+    m = number_of_feature_maps
+    s_k = s_min + (s_max - s_min) * (k - 1)/(m - 1)
+    width_k = s_k * sqrt(aspect_ratio)
+    height_k = s_k / sqrt(aspect_ratio)
+    """</span>
+    <span class="k">return</span> <span class="n">s_min</span> <span class="o">+</span> <span class="p">(</span><span class="n">s_max</span> <span class="o">-</span> <span class="n">s_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">generate_default_boxes</span><span class="p">(</span><span class="n">feature_map_shapes</span><span class="p">,</span> <span class="n">number_of_feature_maps</span><span class="p">,</span> <span class="n">aspect_ratios</span><span class="p">):</span>
+    <span class="s">"""
+    feature map shapes for VGG: [38, 19, 10, 5, 3, 1]
+    """</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_map_shapes</span><span class="p">)</span> <span class="o">==</span> <span class="n">number_of_feature_maps</span><span class="p">,</span> <span class="s">'number of feature maps needs to be {0}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_map_shapes</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_map_shapes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">aspect_ratios</span><span class="p">),</span> <span class="s">'Need aspect ratios for all feature maps'</span>
+
+    <span class="n">prior_boxes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">f_k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_map_shapes</span><span class="p">):</span>
+        <span class="n">s_k</span> <span class="o">=</span> <span class="n">calculate_scale_of_default_boxes</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">number_of_feature_maps</span><span class="p">)</span>
+        <span class="n">s_k_prime</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_k</span> <span class="o">*</span> <span class="n">calculate_scale_of_default_boxes</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">f_k</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">f_k</span><span class="p">):</span>
+                <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">f_k</span>
+                <span class="n">cy</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">f_k</span>
+                <span class="n">prior_boxes</span><span class="p">.</span><span class="n">append</span><span class="p">([</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">s_k_prime</span><span class="p">,</span> <span class="n">s_k_prime</span><span class="p">])</span>
+
+                <span class="k">for</span> <span class="n">ar</span> <span class="ow">in</span> <span class="n">aspect_ratios</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                    <span class="c1"># height, width for numpy
+</span>                    <span class="n">prior_boxes</span><span class="p">.</span><span class="n">append</span><span class="p">([</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">s_k</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ar</span><span class="p">),</span> <span class="n">s_k</span><span class="o">/</span><span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ar</span><span class="p">)])</span>
+
+    <span class="n">prior_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">prior_boxes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">prior_boxes</span><span class="p">,</span> <span class="n">clip_value_min</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">clip_value_max</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">)</span>
+
+
+<span class="c1"># Adapted from https://gist.github.com/escuccim/d0be49ccfc6084cdc784a67339f130dd
+</span><span class="k">def</span> <span class="nf">box_overlap_iou</span><span class="p">(</span><span class="n">boxes</span><span class="p">,</span> <span class="n">gt_boxes</span><span class="p">):</span>
+    <span class="s">"""
+    Args:
+        boxes: shape (total boxes, x_min, y_min, x_max, y_max)
+        gt_boxes: shape (1, total label, x_min  y_min, x_max, y_max)
+
+    Returns:
+        Tensor with shape (batch_size, total boxes, total label)
+    """</span>
+    <span class="n">box_x_min</span><span class="p">,</span> <span class="n">box_y_min</span><span class="p">,</span> <span class="n">box_x_max</span><span class="p">,</span> <span class="n">box_y_max</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">boxes</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">gt_boxes_x_min</span><span class="p">,</span> <span class="n">gt_boxes_y_min</span><span class="p">,</span> <span class="n">gt_boxes_x_max</span><span class="p">,</span> <span class="n">gt_boxes_y_max</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">gt_boxes</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># From https://www.tensorflow.org/api_docs/python/tf/transpose
+</span>    <span class="n">intersection_x_min</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">box_x_min</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">gt_boxes_x_min</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="n">intersection_y_min</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">box_y_min</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">gt_boxes_y_min</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">intersection_x_max</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">box_x_max</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">gt_boxes_x_max</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="n">intersection_y_max</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">box_y_max</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">gt_boxes_y_max</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+
+    <span class="c1"># need to take care of boxes that don't overlap at all
+</span>    <span class="n">intersection_area</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">intersection_x_max</span> <span class="o">-</span> <span class="n">intersection_x_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">intersection_y_max</span> <span class="o">-</span> <span class="n">intersection_y_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">boxes_areas</span> <span class="o">=</span> <span class="p">(</span><span class="n">box_x_max</span> <span class="o">-</span> <span class="n">box_x_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">box_y_max</span> <span class="o">-</span> <span class="n">box_y_min</span><span class="p">)</span>
+    <span class="n">gt_box_areas</span> <span class="o">=</span> <span class="p">(</span><span class="n">gt_boxes_x_max</span> <span class="o">-</span> <span class="n">gt_boxes_x_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">gt_boxes_y_max</span> <span class="o">-</span> <span class="n">gt_boxes_y_min</span><span class="p">)</span>
+
+    <span class="n">union</span> <span class="o">=</span> <span class="p">(</span><span class="n">boxes_areas</span> <span class="o">+</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">gt_box_areas</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">-</span> <span class="n">intersection_area</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">intersection_area</span> <span class="o">/</span> <span class="n">union</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">match_priors_with_gt</span><span class="p">(</span><span class="n">prior_boxes</span><span class="p">,</span> <span class="n">boxes</span><span class="p">,</span> <span class="n">gt_boxes</span><span class="p">,</span> <span class="n">gt_labels</span><span class="p">,</span> <span class="n">number_of_labels</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+    
+    <span class="s">"""
+    prior boxes: (1, number of default boxes, c_x, c_y, w, h)
+    boxes: shape (total boxes, x_min, y_min, x_max, y_max)
+    gt_boxes: (1, number of labels, x_min, y_min, x_max, y_max)
+    gt_labels: (1, 1 label per each gt box)
+
+    0 is background, so the gt_labels is the number of labels in the dataset + 1
+    class 0 is reserved.
+    """</span>
+
+    <span class="c1"># number of rows for the IOU map the is the number of gt_boxes
+</span>    <span class="n">IOU_map</span> <span class="o">=</span> <span class="n">box_overlap_iou</span><span class="p">(</span><span class="n">boxes</span><span class="p">,</span> <span class="n">gt_boxes</span><span class="p">)</span>
+
+    <span class="c1"># convert ground boxes labels to box label format
+</span>    <span class="n">gt_box_label</span> <span class="o">=</span> <span class="n">convert_to_centre_dimensions_form</span><span class="p">(</span><span class="n">gt_boxes</span><span class="p">)</span>
+
+    <span class="c1"># select the box with the highest IOU
+</span>    <span class="n">highest_overlap_idx</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">math</span><span class="p">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">IOU_map</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">highest_overlap_idx</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">highest_overlap_idx</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nb">range</span><span class="p">(</span><span class="n">IOU_map</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">highest_overlap_idx_map</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">equal</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">highest_overlap_idx</span><span class="p">)),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">IOU_map</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">highest_overlap_idx_map</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">IOU_map</span><span class="p">)</span>
+
+    <span class="c1"># find the column idx with the highest IOU at each row
+</span>    <span class="n">max_IOU_idx_per_row</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">math</span><span class="p">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">IOU_map</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># find the max value per row
+</span>    <span class="n">max_IOU_per_row</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">IOU_map</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># threshold IOU
+</span>    <span class="n">max_IOU_above_threshold</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">greater</span><span class="p">(</span><span class="n">max_IOU_per_row</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+    
+    <span class="c1"># map the gt boxes to the prior boxes with the highest overlap
+</span>    <span class="n">gt_box_label_map</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">gather</span><span class="p">(</span><span class="n">gt_box_label</span><span class="p">,</span> <span class="n">max_IOU_idx_per_row</span><span class="p">,</span> <span class="n">batch_dims</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># get the offset, offcet (delta_cx, delta_cy, delta_width, delta_height)
+</span>    <span class="n">gt_box_label_map_offsets</span> <span class="o">=</span> <span class="n">calculate_offset_from_gt</span><span class="p">(</span><span class="n">gt_box_label_map</span><span class="p">,</span> <span class="n">prior_boxes</span><span class="p">)</span>
+    <span class="c1"># remove from gt_boxes_map where overlap with prior boxes is less than 0.5
+</span>    <span class="n">gt_boxes_map_offset_suppressed</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span> <span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">max_IOU_above_threshold</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>  
+                                        <span class="n">gt_box_label_map_offsets</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">gt_box_label_map</span><span class="p">))</span>
+    <span class="c1"># add a positive condition column for the localization loss
+</span>    <span class="n">max_IOU_above_threshold_expand</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">max_IOU_above_threshold</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">max_IOU_above_threshold_expand</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">max_IOU_above_threshold_expand</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">gt_boxes_map_offset_suppressed_with_pos_cond</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span>  <span class="n">gt_boxes_map_offset_suppressed</span><span class="p">,</span> 
+                                                                <span class="n">max_IOU_above_threshold_expand</span> <span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+
+    <span class="n">gt_labels_map</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">gather</span><span class="p">(</span><span class="n">gt_labels</span><span class="p">,</span> <span class="n">max_IOU_idx_per_row</span><span class="p">,</span> <span class="n">batch_dims</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># suppress the label where IOU with the gt boxes is &lt; 0.5
+</span>    <span class="n">gt_labels_map_suppressed</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span> <span class="n">max_IOU_above_threshold</span><span class="p">,</span> 
+                                        <span class="n">gt_labels_map</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">gt_labels_map</span><span class="p">))</span>
+    <span class="n">gt_labels_one_hot_encoded</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">gt_labels_map_suppressed</span><span class="p">,</span> <span class="n">number_of_labels</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gt_boxes_map_offset_suppressed_with_pos_cond</span><span class="p">,</span> <span class="n">gt_labels_one_hot_encoded</span>
+
+<span class="k">def</span> <span class="nf">calculate_offset_from_gt</span><span class="p">(</span><span class="n">gt_boxes_mapped_to_prior</span><span class="p">,</span> <span class="n">prior_boxes</span><span class="p">):</span>
+    <span class="n">prior_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">prior_boxes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">g_j_cx</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">gt_boxes_mapped_to_prior</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">prior_boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">g_j_cy</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">gt_boxes_mapped_to_prior</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">prior_boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">g_j_w</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">math</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">gt_boxes_mapped_to_prior</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">prior_boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">g_j_h</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">math</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">gt_boxes_mapped_to_prior</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="n">prior_boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">])</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">concat</span><span class="p">(</span> <span class="p">[</span> <span class="n">g_j_cx</span><span class="p">,</span> <span class="n">g_j_cy</span><span class="p">,</span> <span class="n">g_j_w</span><span class="p">,</span> <span class="n">g_j_h</span> <span class="p">]</span> <span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">),</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">convert_to_box_form</span><span class="p">(</span><span class="n">boxes</span><span class="p">):</span>
+    <span class="s">"""
+    Input:
+        (number_of_labels, c_x, c_y, width, height)
+    Output:
+        (number_of_labels, x_min, y_min, x_max, y_max)
+    """</span>
+
+    <span class="n">box_coordinates</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span>   <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">boxes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> 
+                                    <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">boxes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:]</span> <span class="o">/</span> <span class="mi">2</span> <span class="p">],</span> 
+                                    <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">box_coordinates</span><span class="p">,</span> <span class="n">clip_value_min</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">clip_value_max</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">convert_to_centre_dimensions_form</span><span class="p">(</span><span class="n">boxes</span><span class="p">):</span>
+    <span class="s">"""
+    Input:
+        boxes: (1, number_of_labels, x_min, y_min, x_max, y_max)
+    Output:
+        (1, number_of_labels, c_x, c_y, width, height)
+    """</span>
+
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span>
+                <span class="p">[</span>
+                        <span class="p">(</span><span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> 
+                        <span class="p">(</span><span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>
+                        <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">boxes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="p">]],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># need the output in the same format as input, could be imporived
+</span>    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">clip_value_min</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">clip_value_max</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="implementing-ssd-loss">Implementing SSD Loss</h2>
 
 
     
