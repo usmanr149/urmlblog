@@ -326,17 +326,17 @@ MathJax.Hub.Config({
 
 <p>In SSD archtecture, we remove the ending fully connected layers:</p>
 
-<p><img src="/urmlblog/images/SSD/VGG16-architecture-remove-fcnn.jpg" alt="_config.yml" />
+<p><img src="/urmlblog/images/SSD/VGG16-architecture-remove-fcnn.jpeg" alt="_config.yml" />
 <em>From <a href="https://www.learndatasci.com/tutorials/hands-on-transfer-learning-keras/" target="_blank">Hands-on Transfer Learning with Keras and the VGG16 Model</a> by James McDermott. The last last layer are removed from VGG16 when it is tranformed to an SSD.</em></p>
 
 <p>and use the output of the conv4_3 layer as a feature map.</p>
 
-<p><img src="/urmlblog/images/SSD/SSD Architecture -- 1.png" alt="_config.yml" />
+<p><img src="/urmlblog/images/SSD/SSD_Architecture1.png" alt="_config.yml" />
 <em>Use the output from the conv4_3 layer as a feature map on which to base detections.</em></p>
 
 <p>But thats not all, in SSD we want to make detections at various scales, we want to detect large objects small objects and everything in-between. So we add layers to generate a stack of feature maps with a variety of sizes. These feature maps will be used to make detections.</p>
 
-<p><img src="/urmlblog/images/SSD/SSD Architecture -- 2.png" alt="_config.yml" />
+<p><img src="/urmlblog/images/SSD/SSD_Architecture2.png" alt="_config.yml" />
 <em>Feature maps generated from the base VGG16 model.</em></p>
 
 <p>The SSD paper explains that these feature maps will have different receptive field sizes, the anchor boxes we will generate don’t need to exactly corresond to the actual receptive fields. The paper presents a method to generate anchor “boxes so that specific feature maps learn to be responsive to particular scales of the objects.”</p>
@@ -462,6 +462,15 @@ h_{k}^{a} = s_{k}/\sqrt(a_{r})\]
     
       <li>
         <h3>
+          <a href="/urmlblog/computer%20vision/2022/09/10/Implenting-SSD-TF2.html">
+            Implementing a Single Shot Detector Model in Tensorflow 2.0
+            <small>10 Sep 2022</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
           <a href="/urmlblog/time%20series/2021/04/30/2021-4-30-AR-model.html">
             Autoregressive Model -- Properties of AR(1) Model
             <small>30 Apr 2021</small>
@@ -474,15 +483,6 @@ h_{k}^{a} = s_{k}/\sqrt(a_{r})\]
           <a href="/urmlblog/stocks/2020/10/01/stock-movement-prediction.html">
             Training a Machine Learning Algorithm to Predict Stock Price Movement
             <small>01 Oct 2020</small>
-          </a>
-        </h3>
-      </li>
-    
-      <li>
-        <h3>
-          <a href="/urmlblog/cnn/2020/05/24/Unet-Architectecture-TF.html">
-            U-NET Convolution Neural Network for Semantic Segmentation
-            <small>24 May 2020</small>
           </a>
         </h3>
       </li>

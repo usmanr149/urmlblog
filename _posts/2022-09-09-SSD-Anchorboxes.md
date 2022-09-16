@@ -24,17 +24,17 @@ The shape and number of anchor boxes generated depends on the underlying Convolu
 
 In SSD archtecture, we remove the ending fully connected layers:
 
-![_config.yml]({{ site.baseurl }}/images/SSD/VGG16-architecture-remove-fcnn.jpg)
+![_config.yml]({{ site.baseurl }}/images/SSD/VGG16-architecture-remove-fcnn.jpeg)
 *From <a href="https://www.learndatasci.com/tutorials/hands-on-transfer-learning-keras/" target="_blank">Hands-on Transfer Learning with Keras and the VGG16 Model</a> by James McDermott. The last last layer are removed from VGG16 when it is tranformed to an SSD.*
 
 and use the output of the conv4_3 layer as a feature map.
 
-![_config.yml]({{ site.baseurl }}/images/SSD/SSD Architecture -- 1.png)
+![_config.yml]({{ site.baseurl }}/images/SSD/SSD_Architecture1.png)
 *Use the output from the conv4_3 layer as a feature map on which to base detections.*
 
 But thats not all, in SSD we want to make detections at various scales, we want to detect large objects small objects and everything in-between. So we add layers to generate a stack of feature maps with a variety of sizes. These feature maps will be used to make detections.
 
-![_config.yml]({{ site.baseurl }}/images/SSD/SSD Architecture -- 2.png)
+![_config.yml]({{ site.baseurl }}/images/SSD/SSD_Architecture2.png)
 *Feature maps generated from the base VGG16 model.*
 
 The SSD paper explains that these feature maps will have different receptive field sizes, the anchor boxes we will generate don't need to exactly corresond to the actual receptive fields. The paper presents a method to generate anchor "boxes so that specific feature maps learn to be responsive to particular scales of the objects."
