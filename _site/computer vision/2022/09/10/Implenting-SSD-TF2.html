@@ -121,15 +121,15 @@ MathJax.Hub.Config({
   
 
   
-
-  
-
-  
     
   
 
   
     
+  
+
+  
+
   
 
 
@@ -170,15 +170,15 @@ MathJax.Hub.Config({
   
 
   
-
-  
-
-  
     
   
 
   
     
+  
+
+  
+
   
 
 
@@ -315,7 +315,7 @@ MathJax.Hub.Config({
 
 <p><img src="/urmlblog/images/SSD/image_w_bbox.png" alt="_config.yml" /></p>
 
-<p>In addition we also need default boxes (also called anchor boxes). At training time, the default boxes are matched to the ground truth boxes. The image below shows all of the default boxes that overlap with the ground truth box.</p>
+<p>In addition we also need default boxes (also called <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">anchor boxes</a>). At training time, the default boxes are matched to the ground truth boxes. The image below shows all of the default boxes that overlap with the ground truth box.</p>
 
 <p><img src="/urmlblog/images/SSD/default_boxes_w_IOU_g_0.5.png" alt="_config.yml" /></p>
 
@@ -327,11 +327,11 @@ MathJax.Hub.Config({
 
 <p><img src="/urmlblog/images/SSD/VGG-16-SSD.png" alt="_config.yml" /></p>
 
-<p>SSD uses multi-scale feature maps for detections at multiple scales. We generate default boxes that are associated with each feature map cell. For example in the image below, we can see how the CNN output maps to the default boxes for an image.</p>
+<p>In SSD, the tiles of convolution kernels map to the default boxes. The goal is to predict the offsets of the default boxes and the class scores. In the image below, we can see how the CNN output maps to the default boxes for an image.</p>
 
 <p><img src="/urmlblog/images/SSD/Default_Boxes_and_CNN_outputs.png" alt="_config.yml" /></p>
 
-<p>For each default box we generate $(4 + c + 1)$ outputs, where 4 because of the offsets, $c$ is the number of classes in the dataset and +1 for background.</p>
+<p>For each default box we generate $(4 + c + 1)$ outputs, where 4 because of the offsets, $c$ is the number of classes in the dataset and +1 for background. To detect an object at muliple scales within a dataset SSD uses multi-scale feature maps for detections at multiple scales.</p>
 
 <h2 id="matching-default-boxes-to-ground-truth-boxes">Matching Default Boxes to Ground Truth Boxes</h2>
 
@@ -372,7 +372,7 @@ MathJax.Hub.Config({
 0, ~~~ \text{otherwise}
 \end{cases}\]
 
-<p>The prior variances or the scaling constants are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easy to optimize.</p>
+<p>The prior variances or the scaling constants (5 and 10 in Eq. \ref{eq:offsets}) are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easier to optimize.</p>
 
 <p>The confidence loss is the softmax loss over multiple classes:</p>
 
@@ -383,7 +383,7 @@ MathJax.Hub.Config({
 
 <h2 id="implementing-ssd-in-tensorflow-20">Implementing SSD in Tensorflow 2.0</h2>
 
-<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">previous post</a> so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid representation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the the corners representation: $[xmin, ymin, xmax, ymax]$.</p>
+<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">previous post</a> so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid representation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the corners representation: $[xmin, ymin, xmax, ymax]$.</p>
 
 <p><img src="/urmlblog/images/SSD/Centroid Representation.jpg" alt="_config.yml" />
 <em>Centroid box representation on right, corner representation on left.</em></p>
@@ -414,7 +414,7 @@ yi_{max} = min(y1max, y2max)\]
 
 <p>If the rectangles don’t overlap then</p>
 
-\[yimax  &lt; yimin \text{  or  }  ximax &lt; ximin\]
+\[yi_{max}  &lt; yi_{min} \text{  or  }  xi_{max} &lt; xi_{min}\]
 
 <p>in which case $A_{inter} = 0$.</p>
 
@@ -589,7 +589,7 @@ yi_{max} = min(y1max, y2max)\]
 
 <h2 id="setting-up-the-data-generation-pipeline">Setting up the Data Generation Pipeline</h2>
 
-<p>To train the model we need to setup a data generation pipeline. There is no one best way of encoding your data for the training process. I decided to split the data into two parts, one part encodes the default box offsets and the second part encodes the labels.</p>
+<p>To train the model we need to setup a data generation pipeline. There is no one best way of encoding your data for the training process. I decided to split the data into two parts, one part encodes the default box offsets and the second part encodes the labels. Using this format also allows me to right seperate loss functions for the default box offset regression and for the confidence loss.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DataGenerator</span><span class="p">(</span><span class="n">keras</span><span class="p">.</span><span class="n">utils</span><span class="p">.</span><span class="n">Sequence</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_IDs</span><span class="p">,</span>
@@ -839,6 +839,22 @@ yi_{max} = min(y1max, y2max)\]
 
         <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">total_loss</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
 </code></pre></div></div>
+
+<h2 id="model-training-results">Model Training Results</h2>
+
+<p>I trained the model for a couple of thousand epochs on the VOC2012 datasets. The performance of the model is a bit hit and miss on real out-of-sample dataset as you can see from the images below:</p>
+
+<p><img src="/urmlblog/images/SSD/cat_and_dog.png" alt="_config.yml" /></p>
+
+<p><img src="/urmlblog/images/SSD/aeroplane.png" alt="_config.yml" /></p>
+
+<p><img src="/urmlblog/images/SSD/khabib-dustin.png" alt="_config.yml" /></p>
+
+<p><img src="/urmlblog/images/SSD/woman_with_cat.png" alt="_config.yml" /></p>
+
+<p>My goal is to use this as a starting point for a larger project I am working on so I didn’t train the model further. I just wanted to make sure that the model is implemented correctly, I am sure if I train for a longer periof of time I will see an improvement in performance.</p>
+
+<p>To learn more check out my <a href="https://github.com/usmanr149/SSDModel" target="_blank">github repo</a> here for the complete implementation.</p>
 
     
 

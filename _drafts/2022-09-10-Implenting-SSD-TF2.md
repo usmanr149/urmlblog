@@ -13,7 +13,7 @@ To train an SSD model, we need an input image with ground truth boxes for each o
 
 ![_config.yml]({{ site.baseurl }}/images/SSD/image_w_bbox.png)
 
-In addition we also need default boxes (also called anchor boxes). At training time, the default boxes are matched to the ground truth boxes. The image below shows all of the default boxes that overlap with the ground truth box.
+In addition we also need default boxes (also called <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">anchor boxes</a>). At training time, the default boxes are matched to the ground truth boxes. The image below shows all of the default boxes that overlap with the ground truth box.
 
 ![_config.yml]({{ site.baseurl }}/images/SSD/default_boxes_w_IOU_g_0.5.png)
 
@@ -25,11 +25,11 @@ The SSD approach produces a fixed-size collection of default boxes. The model th
 
 ![_config.yml]({{ site.baseurl }}/images/SSD/VGG-16-SSD.png)
 
-SSD uses multi-scale feature maps for detections at multiple scales. We generate default boxes that are associated with each feature map cell. For example in the image below, we can see how the CNN output maps to the default boxes for an image.
+In SSD, the tiles of convolution kernels map to the default boxes. The goal is to predict the offsets of the default boxes and the class scores. In the image below, we can see how the CNN output maps to the default boxes for an image.
 
 ![_config.yml]({{ site.baseurl }}/images/SSD/Default_Boxes_and_CNN_outputs.png)
 
-For each default box we generate $(4 + c + 1)$ outputs, where 4 because of the offsets, $c$ is the number of classes in the dataset and +1 for background.
+For each default box we generate $(4 + c + 1)$ outputs, where 4 because of the offsets, $c$ is the number of classes in the dataset and +1 for background. To detect an object at muliple scales within a dataset SSD uses multi-scale feature maps for detections at multiple scales.
 
 ## Matching Default Boxes to Ground Truth Boxes
 
@@ -76,7 +76,7 @@ x_{ij}^p = \begin{cases}
 \end{cases}
 $$
 
-The prior variances or the scaling constants are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easy to optimize.
+The prior variances or the scaling constants (5 and 10 in Eq. \ref{eq:offsets}) are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easier to optimize.
 
 The confidence loss is the softmax loss over multiple classes:
 
@@ -89,7 +89,7 @@ where $\hat{c}_i^p$ is the predicted softmax probaility for the default box $i$,
 
 ## Implementing SSD in Tensorflow 2.0
 
-Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">previous post</a> so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid representation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the the corners representation: $[xmin, ymin, xmax, ymax]$.
+Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">previous post</a> so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid representation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the corners representation: $[xmin, ymin, xmax, ymax]$.
 
 ![_config.yml]({{ site.baseurl }}/images/SSD/Centroid Representation.jpg)
 *Centroid box representation on right, corner representation on left.*
@@ -127,7 +127,7 @@ $$
 If the rectangles don't overlap then 
 
 $$
-yimax  < yimin \text{  or  }  ximax < ximin
+yi_{max}  < yi_{min} \text{  or  }  xi_{max} < xi_{min}
 $$
 
 in which case $A_{inter} = 0$.
@@ -557,3 +557,19 @@ class SSDLoss:
 
         return tf.reduce_sum(total_loss, axis = 1) * tf.cast(batch_size, dtype=tf.float32)
 ```
+
+## Model Training Results
+
+I trained the model for a couple of thousand epochs on the VOC2012 datasets. The performance of the model is a bit hit and miss on real out-of-sample dataset as you can see from the images below:
+
+![_config.yml]({{ site.baseurl }}/images/SSD/cat_and_dog.png)
+
+![_config.yml]({{ site.baseurl }}/images/SSD/aeroplane.png)
+
+![_config.yml]({{ site.baseurl }}/images/SSD/khabib-dustin.png)
+
+![_config.yml]({{ site.baseurl }}/images/SSD/woman_with_cat.png)
+
+My goal is to use this as a starting point for a larger project I am working on so I didn't train the model further. I just wanted to make sure that the model is implemented correctly, I am sure if I train for a longer periof of time I will see an improvement in performance.
+
+To learn more check out my <a href='https://github.com/usmanr149/SSDModel' target="_blank">github repo</a> here for the complete implementation.
