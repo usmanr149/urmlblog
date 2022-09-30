@@ -121,15 +121,15 @@ MathJax.Hub.Config({
   
 
   
+
+  
+
+  
     
   
 
   
     
-  
-
-  
-
   
 
 
@@ -170,15 +170,15 @@ MathJax.Hub.Config({
   
 
   
+
+  
+
+  
     
   
 
   
     
-  
-
-  
-
   
 
 
@@ -343,16 +343,20 @@ MathJax.Hub.Config({
 
 \[L(x, c, l, g) = \dfrac{1}{N}(L_{conf}(x,x) + \alpha L_{loc}(x,l,g))\]
 
-<p>where 
-$N$ is the total number of matched default boxes, edge case: if N = 0 then set loss to 0, 
-$x$ is an indicator for matching the $i$-th default boxes to the $j$-th ground truth box, 
-$l$ is the predicted box, 
-$g$ is the ground truth box
-$c$ is the predicted class.</p>
+<p>where</p>
 
-<p>For the localization loss we regress to offsets for the $(cx, cy, w, h)$ of the matching default bounding boxes. See Figure ~ for a description of $cx, cy, w$ and  $h$.</p>
+<ul>
+  <li>$N$ is the total number of matched default boxes, edge case: if N = 0 then set loss to 0,</li>
+  <li>$x$ is an indicator for matching the $i$-th default boxes to the $j$-th ground truth box,</li>
+  <li>$l$ is the predicted box,</li>
+  <li>$g$ is the ground truth box,</li>
+  <li>$c$ is the predicted class,</li>
+  <li>$\alpha$ is set to 1.</li>
+</ul>
 
-\[L_{loc}(x,l,g) = \sum^N_{i \in Pos} \sum_{m \in \{cx, cy,w,h \}}smooth_{\text{L1}}(l_i^m - \hat{g}_j^m)\]
+<p>For the localization loss we regress to offsets for the $(cx, cy, w, h)$ of the matching default bounding boxes.</p>
+
+\[L_{loc}(x,l,g) = x_{ij}^p\sum^N_{i \in Pos} \sum_{m \in \{cx, cy,w,h \}}smooth_{\text{L1}}(l_i^m - \hat{g}_j^m)\]
 
 <p>where</p>
 
@@ -361,13 +365,58 @@ $c$ is the predicted class.</p>
 \hat{g}_j^{w} = 10 * \text{log}\left(\dfrac{g_j^w}{d_i^w}\right) \\
 \hat{g}_j^{h} = 10 * \text{log}\left(\dfrac{g_j^h}{d_i^h}\right) \label{eq:offsets}\]
 
+<p>and</p>
+
+\[x_{ij}^p = \begin{cases}
+1, ~~~ \text{if IOU &gt; threshold between default box } i \text{ and ground truth box } j \text{ on class } p \\
+0, ~~~ \text{otherwise}
+\end{cases}\]
+
 <p>The prior variances or the scaling constants are not mentioned in the paper, but they are used in the code, I read about them <a href="https://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html" target="_blank">here</a>. The author of the paper suggests in a github comment that they can also be understood as loss smoothing factors, the confidence and the localization loss are on a different scale and using the scaling constants brings these two losses together allowing for a smoother loss function that is easy to optimize.</p>
+
+<p>The confidence loss is the softmax loss over multiple classes:</p>
+
+\[L_{conf}(x,c) = -\sum_{i \in Pos}^N x_{ij}^p log(\hat{c}_i^p) - \sum_{i \in Neg}log(\hat{c}_i^0) \\
+\hat{c}_i^p = \dfrac{ e^{c_i^p} }{ \sum_p e^{c_i^p} }\]
+
+<p>where $\hat{c}_i^p$ is the predicted softmax probaility for the default box $i$, $\hat{c}_i^0$ is the predicted softmax probaility that that the default box is a background.</p>
 
 <h2 id="implementing-ssd-in-tensorflow-20">Implementing SSD in Tensorflow 2.0</h2>
 
-<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a previous post so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid represtation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the the corners representation: $[xmin, ymin, xmax, ymax]$.</p>
+<p>Now that we have an understanding of the theory behind SSD model architecture, we can now implement the model in Tensorflow 2.0. I have already covered how to generate anchor boxes in a <a href="https://usmanr149.github.io/urmlblog/computer%20vision/2022/09/09/SSD-Anchorboxes.html" target="_blank">previous post</a> so I will not go over them here. Once we have the default boxes we can then match these default boxes with the ground truth boxes. One thing to note is that the method to generate default boxes covered in my previous blogs outputs the boxes in centroid representation: $[cx, cy, w, h]$, to calculate IOUs between two rectangles it is best to represent to use the the corners representation: $[xmin, ymin, xmax, ymax]$.</p>
 
-<p><img src="/urmlblog/images/SSD/Centroid Representation.jpg" alt="_config.yml" /></p>
+<p><img src="/urmlblog/images/SSD/Centroid Representation.jpg" alt="_config.yml" />
+<em>Centroid box representation on right, corner representation on left.</em></p>
+
+<h2 id="how-to-compute-iou">How to compute IOU?</h2>
+
+<p>Using the corner representation it is straightforward to calculate IOU for 2 rectangles.</p>
+
+<p><img src="/urmlblog/images/SSD/IOU_Calculation.jpg" alt="_config.yml" /></p>
+
+<p>Given a pair of rectangular boxes:</p>
+
+<p><img src="/urmlblog/images/SSD/IOU_Box_Calculation.jpg" alt="_config.yml" /></p>
+
+<p>we can find the top-left coordinates of the intersecting bounding box as:</p>
+
+\[xi_{min} = max(x1min, x2min)
+yi_{min} = max(y1min, y2min)\]
+
+<p>The bottom-right ccordinates of the intersecting box is</p>
+
+\[xi_{max} = min(x1max, x2max) \\
+yi_{max} = min(y1max, y2max)\]
+
+<p>The intersecting area can be easily computed from the coordinates obtained:</p>
+
+\[A_{inter} = max(0, yi_{max} - yi_{min}) * max(0, xi_{max} - xi_{min})\]
+
+<p>If the rectangles don’t overlap then</p>
+
+\[yimax  &lt; yimin \text{  or  }  ximax &lt; ximin\]
+
+<p>in which case $A_{inter} = 0$.</p>
 
 <p>The code below contains helper functions to generate default bounding boxes, find default boxes for which IOU &gt; threshold with ground truth boxes, calculate offsets for training objectives as shown in Eq. \ref{eq:offsets}</p>
 
@@ -538,8 +587,258 @@ $c$ is the predicted class.</p>
     <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">clip_value_min</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">clip_value_max</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">)</span>
 </code></pre></div></div>
 
+<h2 id="setting-up-the-data-generation-pipeline">Setting up the Data Generation Pipeline</h2>
+
+<p>To train the model we need to setup a data generation pipeline. There is no one best way of encoding your data for the training process. I decided to split the data into two parts, one part encodes the default box offsets and the second part encodes the labels.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DataGenerator</span><span class="p">(</span><span class="n">keras</span><span class="p">.</span><span class="n">utils</span><span class="p">.</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_IDs</span><span class="p">,</span>
+                <span class="n">label_folder_path</span><span class="p">,</span>
+                <span class="n">image_folder_path</span><span class="p">,</span> 
+                <span class="n">prior_boxes</span><span class="p">,</span>
+                <span class="n">prior_boxes_point_form</span><span class="p">,</span>
+                <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> 
+                <span class="n">n_classes</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> 
+                <span class="n">image_height</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+                <span class="n">image_width</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+                <span class="n">normalize</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                <span class="n">shuffle</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                <span class="n">image_extension</span> <span class="o">=</span> <span class="s">'.png'</span><span class="p">,</span>
+                <span class="n">training</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">list_IDs</span> <span class="o">=</span> <span class="n">list_IDs</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">n_classes</span> <span class="o">=</span> <span class="n">n_classes</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">label_folder_path</span> <span class="o">=</span> <span class="n">label_folder_path</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">image_folder_path</span> <span class="o">=</span> <span class="n">image_folder_path</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">prior_boxes</span> <span class="o">=</span> <span class="n">prior_boxes</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">prior_boxes_point_form</span> <span class="o">=</span> <span class="n">prior_boxes_point_form</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">image_height</span> <span class="o">=</span> <span class="n">image_height</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">image_width</span> <span class="o">=</span> <span class="n">image_width</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">normalize</span> <span class="o">=</span> <span class="n">normalize</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">image_extension</span> <span class="o">=</span> <span class="n">image_extension</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">training</span> <span class="o">=</span> <span class="n">training</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">on_epoch_end</span><span class="p">()</span>
+
+        <span class="s">"""
+        Inputs:
+            list_IDs: name of files used to look data in label_folder_path and image_folder_path
+            label_folder_path: path to where labels are stored, need to be in .txt format
+            image_folder_path: path to where images are stored, need to be in png
+            prior_boxes: precalculated prior boxes in (c_x, c_y, w, h)
+            prior_boxes_point_form: precomputed prior boxes in (x_min, y_min, x_max, y_max)
+            batch_size: int
+            n_classes: number of classes in the dataset, don't include background
+
+        """</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span> <span class="n">np</span><span class="p">.</span><span class="n">floor</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">list_IDs</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="p">.</span><span class="n">batch_size</span> <span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">indexes</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">batch_size</span><span class="p">:(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">batch_size</span><span class="p">]</span>
+
+        <span class="n">list_IDs_temp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">list_IDs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">]</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">__data_generation</span><span class="p">(</span><span class="n">list_IDs_temp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">list_IDs</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">indexes</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">__data_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_IDs_temp</span><span class="p">):</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">empty</span><span class="p">([</span><span class="bp">self</span><span class="p">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_height</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_width</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">y_label</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">y_loc</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_IDs_temp</span><span class="p">):</span>
+            <span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span>  <span class="n">file_name</span><span class="p">,</span> 
+                                        <span class="bp">self</span><span class="p">.</span><span class="n">image_folder_path</span><span class="p">,</span> 
+                                        <span class="bp">self</span><span class="p">.</span><span class="n">label_folder_path</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="p">.</span><span class="n">image_extension</span>
+                                     <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">training</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                    <span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span> <span class="o">=</span> <span class="n">returnPatches</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                    <span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span> <span class="o">=</span> <span class="n">horizontalFlipImageAndLabels</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+                    <span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span> <span class="o">=</span> <span class="n">verticalFlipImageAndLabels</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span><span class="p">)</span>
+
+            <span class="c1"># take care of images with no labels
+</span>            <span class="c1"># if no label then the whole image is a background
+</span>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labelled_gt_box_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">labelled_gt_box_coords</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">image</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+
+            <span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span> <span class="o">=</span> <span class="n">resize_images_and_labels</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">labelled_gt_box_coords</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_height</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_width</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">normalize</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,]</span> <span class="o">=</span> <span class="n">image</span> <span class="o">/</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_width</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,]</span> <span class="o">=</span> <span class="n">image</span> <span class="o">/</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_width</span>
+
+            <span class="n">labelled_gt_box_coords_normallized</span> <span class="o">=</span> <span class="n">label_dimensions_normalized</span><span class="p">(</span><span class="n">labelled_gt_box_coords</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_height</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_width</span><span class="p">)</span>
+
+            <span class="n">gt_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labelled_gt_box_coords_normallized</span><span class="p">]</span>
+            <span class="n">gt_boxes_normalized</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labelled_gt_box_coords_normallized</span><span class="p">]</span>
+            
+            <span class="n">offset</span><span class="p">,</span> <span class="n">one_hot_encoded_label</span> <span class="o">=</span> <span class="n">match_priors_with_gt</span><span class="p">(</span>   
+                                                            <span class="bp">self</span><span class="p">.</span><span class="n">prior_boxes</span><span class="p">,</span> 
+                                                            <span class="bp">self</span><span class="p">.</span><span class="n">prior_boxes_point_form</span><span class="p">,</span> 
+                                                            <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">([</span><span class="n">gt_boxes_normalized</span><span class="p">]),</span> 
+                                                            <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">([</span><span class="n">gt_labels</span><span class="p">]),</span> 
+                                                            <span class="n">number_of_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">n_classes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> 
+                                                            <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">y_label</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">y_label</span> <span class="o">=</span> <span class="n">one_hot_encoded_label</span>
+                <span class="n">y_loc</span> <span class="o">=</span> <span class="n">offset</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_label</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span><span class="n">y_label</span><span class="p">,</span> <span class="n">one_hot_encoded_label</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">y_loc</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span><span class="n">y_loc</span><span class="p">,</span> <span class="n">offset</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="p">[</span><span class="n">y_loc</span><span class="p">,</span> <span class="n">y_label</span><span class="p">]</span>
+</code></pre></div></div>
+
 <h2 id="implementing-ssd-loss">Implementing SSD Loss</h2>
 
+<p>Once we have matched the ground truth boxes with the default boxes. Most of the default boxes will end up being negatives. As a result, the labels will end up being significantly imbalanced. To deal with this imbalance, we use a technique called negative mining. Instead of using all of the negative training examples we sort the softmax confidence metric for each default box and pick the top ones so that the ratio between negatives and positive is at most 3:1.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SSDLoss</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">negative_mining_ratio</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">negative_mining_ratio</span> <span class="o">=</span> <span class="n">negative_mining_ratio</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+    <span class="c1"># From https://github.com/pierluigiferrari/ssd_keras/blob/master/keras_loss_function/keras_ssd_loss.py
+</span>    <span class="k">def</span> <span class="nf">smooth_L1_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+        <span class="s">'''
+        Compute smooth L1 loss, see references.
+        Arguments:
+            y_true (nD tensor): A TensorFlow tensor of any shape containing the ground truth data.
+                In this context, the expected tensor has shape `(batch_size, #boxes, 4)` and
+                contains the ground truth bounding box coordinates, where the last dimension
+                contains `(xmin, xmax, ymin, ymax)`.
+            y_pred (nD tensor): A TensorFlow tensor of identical structure to `y_true` containing
+                the predicted data, in this context the predicted bounding box coordinates.
+        Returns:
+            The smooth L1 loss, a nD-1 Tensorflow tensor. In this context a 2D tensor
+            of shape (batch, n_boxes_total).
+        References:
+            https://arxiv.org/abs/1504.08083
+        '''</span>
+        <span class="n">absolute_loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="n">square_loss</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">l1_loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">less</span><span class="p">(</span><span class="n">absolute_loss</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">square_loss</span><span class="p">,</span> <span class="n">absolute_loss</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">l1_loss</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># From https://github.com/pierluigiferrari/ssd_keras/blob/master/keras_loss_function/keras_ssd_loss.py
+</span>    <span class="k">def</span> <span class="nf">log_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+        <span class="s">'''
+        Compute the softmax log loss.
+        Arguments:
+            y_true (nD tensor): A TensorFlow tensor of any shape containing the ground truth data.
+                In this context, the expected tensor has shape (batch_size, #boxes, #classes)
+                and contains the ground truth bounding box categories.
+            y_pred (nD tensor): A TensorFlow tensor of identical structure to `y_true` containing
+                the predicted data, in this context the predicted bounding box categories.
+        Returns:
+            The softmax log loss, a nD-1 Tensorflow tensor. In this context a 2D tensor
+            of shape (batch, n_boxes_total).
+        '''</span>
+        <span class="c1"># Make sure that `y_pred` doesn't contain any zeros (which would break the log function)
+</span>        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="mf">1e-15</span><span class="p">)</span>
+        <span class="c1"># Compute the log loss
+</span>        <span class="n">log_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">y_true</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">math</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_pred</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">log_loss</span>
+
+    <span class="k">def</span> <span class="nf">localization_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual_deltas</span><span class="p">,</span> <span class="n">pred_delta</span><span class="p">):</span>
+        <span class="s">"""
+        input:
+            actual_deltas: (batch_size, number of prior boxes, [delta_cx, delta_cy, delta_w, delta_h, pos_cond])
+            pred_delta = (batch_size, number of prior boxes, [delta_cx, delta_cy, delta_w, delta_h])
+
+        outputs:
+            loc_loss: Huber loss over all prior boxes with IOU &gt; threshold (defined elsewhere)
+            over ground label boxes
+        """</span>
+
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">shape</span><span class="p">(</span><span class="n">pred_delta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">localization_loss_for_all_priors</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">smooth_L1_loss</span><span class="p">(</span><span class="n">actual_deltas</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">pred_delta</span><span class="p">)</span>
+
+        <span class="n">localization_loss_for_all_priors</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">localization_loss_for_all_priors</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c1"># localization loss is only for default prior boxes with IOU &gt; 0.5 over ground truth boxes
+</span>        <span class="n">localization_loss_for_all_priors</span> <span class="o">=</span> <span class="n">localization_loss_for_all_priors</span> <span class="o">*</span> <span class="n">actual_deltas</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">]</span>
+
+        <span class="n">total_pos_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">actual_deltas</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># If an image has no labels, the loc loss for that image should be 0.
+</span>        <span class="n">no_label_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_any</span><span class="p">(</span> <span class="n">tf</span><span class="p">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">total_pos_boxes</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.</span><span class="p">)),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)</span>
+
+        <span class="n">total_pos_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">total_pos_boxes</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">total_pos_boxes</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">transpose</span><span class="p">([</span><span class="n">no_label_mask</span><span class="p">]),</span> 
+                                                    <span class="n">localization_loss_for_all_priors</span> <span class="o">/</span> <span class="n">total_pos_boxes</span><span class="p">,</span> 
+                                                    <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">confidence_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual_labels</span><span class="p">,</span> <span class="n">pred_labels</span><span class="p">):</span>
+        <span class="s">"""
+        inputs:
+            actual_labels = (batch_size, number of prior boxes, total labels)
+            pred_labels = (batch_size, number of prior boxes, total labels)
+        
+        outputs:
+            conf_loss = loss per class
+        """</span>
+
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">shape</span><span class="p">(</span><span class="n">pred_labels</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">confidence_loss_for_all</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">log_loss</span><span class="p">(</span><span class="n">actual_labels</span><span class="p">,</span> <span class="n">pred_labels</span><span class="p">)</span>
+
+        <span class="n">confidence_loss_for_all</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">confidence_loss_for_all</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">pos_cond</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_any</span><span class="p">(</span> <span class="n">tf</span><span class="p">.</span><span class="n">equal</span><span class="p">(</span><span class="n">actual_labels</span><span class="p">[...,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">pos_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pos_cond</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">total_pos_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">pos_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">pos_loss</span> <span class="o">=</span> <span class="n">pos_mask</span> <span class="o">*</span> <span class="n">confidence_loss_for_all</span>
+
+        <span class="c1"># hard negative mining
+</span>        <span class="c1"># set positive cases to 0
+</span>        <span class="n">neg_cond</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_any</span><span class="p">(</span> <span class="n">tf</span><span class="p">.</span><span class="n">equal</span><span class="p">(</span><span class="n">actual_labels</span><span class="p">[...,</span> <span class="p">:</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="n">confidence_loss_for_all</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">neg_cond</span><span class="p">,</span> <span class="n">confidence_loss_for_all</span><span class="p">,</span> 
+                                        <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+                                        <span class="p">)</span>
+        
+        <span class="c1"># If there are no positive positive boxes in the select top k
+</span>        <span class="n">neg_boxes_for_empty_images</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total_neg_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">total_pos_boxes</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">negative_mining_ratio</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">no_neg_boxes_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">total_neg_boxes</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">total_neg_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">no_neg_boxes_mask</span><span class="p">,</span> <span class="n">total_neg_boxes</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">constant</span><span class="p">(</span><span class="n">neg_boxes_for_empty_images</span><span class="p">))</span>
+
+        <span class="c1"># sort by positive example
+</span>        <span class="n">loss_sorted_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">confidence_loss_for_all</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s">"DESCENDING"</span><span class="p">)</span>
+        <span class="n">loss_sorted_rank</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">loss_sorted_indices</span><span class="p">)</span>
+
+        <span class="n">neg_mining_cond</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">less</span><span class="p">(</span><span class="n">loss_sorted_rank</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">total_neg_boxes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">neg_mining_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">neg_mining_cond</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">neg_loss</span> <span class="o">=</span> <span class="n">neg_mining_mask</span> <span class="o">*</span> <span class="n">confidence_loss_for_all</span>
+        <span class="c1"># total_boxes = total_pos_boxes + tf.cast(total_neg_boxes, tf.float32)
+</span>        <span class="n">total_pos_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">total_pos_boxes</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">total_pos_boxes</span><span class="p">)</span>
+        <span class="n">total_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">pos_loss</span> <span class="o">+</span> <span class="n">neg_loss</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="p">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">total_pos_boxes</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">total_loss</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="p">.</span><span class="n">cast</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+</code></pre></div></div>
 
     
 
