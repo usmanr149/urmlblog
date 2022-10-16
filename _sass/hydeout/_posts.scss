@@ -91,3 +91,11 @@ article + *,
 button.disqus-load {
   margin-top: 1em;
 }
+
+// Image centering
+
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

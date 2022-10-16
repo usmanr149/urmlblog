@@ -376,6 +376,8 @@ article + * > h2:first-child, article + * > h3:first-child, .post-body ~ section
 
 button.disqus-load { margin-top: 1em; }
 
+img { display: block; margin-left: auto; margin-right: auto; }
+
 /* Pagination
  Super lightweight (HTML-wise) blog pagination. Should only be visible when there is navigation available -- single buttons at top or bottom of each page.
 */
