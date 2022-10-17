@@ -6,9 +6,9 @@ tags: [Projection, Geometry, Dot Product]
 ---
 
 ![_config.yml]({{ site.baseurl }}/images/point_in_rectangle/Point_in_Rectangle.jpg){:.centered}
-*How to determine if the point is insing the rectangle?*
+*How to determine if the point is inside the rectangle?*
 
-While working on a problem recently I had to figure out how to find if a point is inside a non-axis aligned rectangle. After doing a bit of research online I found that there are a few ways of solving this problem. One very simple way to solve this problem is by splitting the spling rectangle into 4 triangles, this solution is described wonderfully <a href='https://martin-thoma.com/how-to-check-if-a-point-is-inside-a-rectangle/' target="_blank">here</a>.
+While working on a problem recently I had to figure out how to find if a point is inside a non-axis aligned rectangle. After doing a bit of research online I found that there are a few ways of solving this problem. One very simple way to solve this problem is to split the rectangle into 4 triangles, this solution is described wonderfully <a href='https://martin-thoma.com/how-to-check-if-a-point-is-inside-a-rectangle/' target="_blank">here</a>.
 
 This solution still looks like a lot of work for a rather simple problem. After doing a bit of research I came across this <a href='https://math.stackexchange.com/a/190373' target="_blank">answer</a> on stackexchange. The answer looks really simple and elegant but the author doesn't provide any explanation for the result. After a bit of thinking I have figured out why the solution that the author provided works.
 
